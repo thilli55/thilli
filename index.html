@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THILLI ظِلّي – لوحة القبعة الذكية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#6234D8; --brand-600:#5126C2; --brand-ink:#2A1260; --brand-50:#F6F2FF; --brand-100:#ECE4FF; --brand-200:#D8CBFF;
+  --bg:#F6F4FB; --surface:#FFFFFF; --text:#1C1530; --muted:#6B6382; --border:#E8E3F4;
+  --green:#15803D; --green-led:#22C55E; --green-bg:#E8F7EE;
+  --yellow:#946200; --yellow-led:#FACC15; --yellow-bg:#FEF7DA;
+  --red:#C81E1E; --red-led:#EF4444; --red-bg:#FDEBEB;
+  --off:#7F7891; --off-led:#B9B4C6; --off-bg:#F0EEF5;
+  --radius:20px; --radius-sm:12px;
+  --shadow:0 1px 2px rgba(42,18,96,.04),0 10px 30px rgba(42,18,96,.06);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;line-height:1.3}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;display:inline-block}
+td.num{display:table-cell;text-align:start}
+[dir=rtl] td.num{text-align:right}
+svg.lucide{width:18px;height:18px;flex:none}
+:focus-visible{outline:3px solid var(--brand-200);outline-offset:2px}
+.wrap{max-width:1440px;margin:0 auto;padding:0 24px}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.88);backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--border)}
+.topbar-in{display:flex;align-items:center;gap:18px;min-height:68px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.brand-mark{width:40px;height:40px;flex:none}
+.brand-txt{display:flex;flex-direction:column;line-height:1.05}
+.brand-txt b{font-size:19px;letter-spacing:.08em;color:var(--brand-ink)}
+.brand-ar{font-size:13px;color:var(--brand);font-weight:600}
+.mode-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;background:var(--brand-50);color:var(--brand-600);font-size:13px;font-weight:600;border:1px solid var(--brand-100)}
+.pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--brand);box-shadow:0 0 0 0 rgba(98,52,216,.5);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(98,52,216,.45)}70%{box-shadow:0 0 0 8px rgba(98,52,216,0)}100%{box-shadow:0 0 0 0 rgba(98,52,216,0)}}
+.tabs{display:flex;gap:4px;margin-inline-start:auto;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;text-decoration:none;color:var(--muted);font-weight:500;white-space:nowrap;transition:background .2s,color .2s}
+.tabs a:hover{background:var(--brand-50);color:var(--brand-ink)}
+.tabs a.active{background:var(--brand);color:#fff}
+.top-actions{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:12px;padding:9px 16px;font-weight:600;background:var(--brand);color:#fff;transition:background .2s,transform .1s,border-color .2s;white-space:nowrap}
+.btn:hover{background:var(--brand-600)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--surface);color:var(--brand-ink);border-color:var(--border)}
+.btn.ghost:hover{background:var(--brand-50);border-color:var(--brand-200)}
+.btn.sm{padding:7px 12px;font-size:14px}
+.btn.power.is-off{background:var(--surface);color:var(--red);border-color:#F3C9C9}
+.btn.power.is-off:hover{background:var(--red-bg)}
+.btn.danger{background:var(--surface);color:var(--red);border-color:#F3C9C9}
+.btn.danger:hover{background:var(--red-bg)}
+
+/* ---------- layout ---------- */
+main{padding:24px 0 40px}
+.view{display:none;animation:fade .28s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.grid{display:grid;gap:20px;margin-bottom:20px}
+.g-hero{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+.g-main{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)}
+.g-sensors{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.card-h h2{font-size:17px;font-weight:700}
+.card-h .lucide{color:var(--brand)}
+.card-h .spacer{flex:1}
+.tag{font-size:12px;font-weight:600;color:var(--brand-600);background:var(--brand-50);border-radius:999px;padding:3px 10px;direction:ltr}
+.sub{color:var(--muted);font-size:14px}
+.page-h{margin-bottom:20px}
+.page-h h1{font-size:26px;font-weight:700;color:var(--brand-ink)}
+.page-h p{color:var(--muted);margin-top:4px}
+.empty{color:var(--muted);text-align:center;padding:28px 10px;font-size:14px}
+
+/* ---------- alert hero ---------- */
+.alert-hero{display:flex;gap:24px;align-items:center;padding:26px 28px;transition:background .4s,border-color .4s;position:relative;overflow:hidden}
+.alert-hero[data-level=green]{background:var(--green-bg);border-color:#C7EBD4}
+.alert-hero[data-level=yellow]{background:var(--yellow-bg);border-color:#F4E2A0}
+.alert-hero[data-level=red]{background:var(--red-bg);border-color:#F4C2C2}
+.alert-hero[data-level=off]{background:var(--off-bg);border-color:var(--border)}
+.hero-led{width:104px;height:104px;border-radius:50%;display:grid;place-items:center;background:#fff;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.led-dot{width:58px;height:58px;border-radius:50%;background:var(--off-led);transition:background .35s,box-shadow .35s}
+[data-level=green] .led-dot{background:var(--green-led);box-shadow:0 0 0 8px rgba(34,197,94,.16),0 0 36px rgba(34,197,94,.7)}
+[data-level=yellow] .led-dot{background:var(--yellow-led);box-shadow:0 0 0 8px rgba(250,204,21,.2),0 0 36px rgba(250,204,21,.8)}
+[data-level=red] .led-dot{background:var(--red-led);box-shadow:0 0 0 8px rgba(239,68,68,.18),0 0 40px rgba(239,68,68,.75);animation:ledPulse 1.2s ease-in-out infinite}
+@keyframes ledPulse{50%{box-shadow:0 0 0 12px rgba(239,68,68,.1),0 0 52px rgba(239,68,68,.9)}}
+.hero-body{flex:1;min-width:0}
+.eyebrow{font-size:13px;font-weight:600;color:var(--muted)}
+.hero-level{font-size:30px;font-weight:700;margin:2px 0 4px}
+[data-level=green] .hero-level{color:var(--green)}
+[data-level=yellow] .hero-level{color:var(--yellow)}
+[data-level=red] .hero-level{color:var(--red)}
+[data-level=off] .hero-level{color:var(--off)}
+.hero-msg{font-size:17px;font-weight:500;margin-bottom:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.75);border:1px solid rgba(0,0,0,.06);font-size:13px;font-weight:500}
+.chip.sim{color:var(--brand-600)}
+.chip.on .lucide{animation:buzz .18s linear infinite}
+@keyframes buzz{25%{transform:translateX(-1px) rotate(-6deg)}75%{transform:translateX(1px) rotate(6deg)}}
+
+/* ---------- status ---------- */
+.kv{margin:0;display:grid;gap:2px}
+.kv>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--border);align-items:center}
+.kv>div:last-child{border-bottom:0}
+.kv dt{color:var(--muted);font-size:14px}
+.kv dd{margin:0;font-weight:600;text-align:end;font-size:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:600}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.green{background:var(--green-bg);color:var(--green)}
+.pill.yellow{background:var(--yellow-bg);color:var(--yellow)}
+.pill.red{background:var(--red-bg);color:var(--red)}
+.pill.off{background:var(--off-bg);color:var(--off)}
+.pill.brand{background:var(--brand-50);color:var(--brand-600)}
+.conn-note{display:block;font-weight:400;color:var(--muted);font-size:12px}
+
+/* ---------- hat viewer ---------- */
+.hat-card{display:flex;flex-direction:column}
+.hat-stage{position:relative;flex:1;min-height:400px;border-radius:16px;background:radial-gradient(ellipse at 50% 35%,#FFFFFF 0%,var(--brand-50) 60%,#EEE8FB 100%);overflow:hidden;touch-action:none;cursor:grab}
+.hat-stage:active{cursor:grabbing}
+.hat-stage canvas{display:block;width:100%!important;height:100%!important;position:absolute;inset:0}
+.hat-labels{position:absolute;inset:0;pointer-events:none}
+.part-label{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:none;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(28,21,48,.86);color:#fff;font-size:12px;font-weight:600;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.part-label i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.parts-on .part-label{display:inline-flex}
+.hat-overlay{position:absolute;top:12px;inset-inline-start:12px;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.hat-zoom{position:absolute;bottom:12px;inset-inline-end:12px;display:flex;flex-direction:column;gap:6px}
+.icon-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--border);background:rgba(255,255,255,.92);display:grid;place-items:center;color:var(--brand-ink)}
+.icon-btn:hover{background:var(--brand-50)}
+.hat-hint{font-size:13px;color:var(--muted);margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.render-note{font-size:12px;color:var(--muted);background:rgba(255,255,255,.85);border-radius:8px;padding:3px 8px;position:absolute;bottom:12px;inset-inline-start:12px}
+.parts-legend{display:none;gap:6px 14px;flex-wrap:wrap;font-size:13px;margin-top:10px}
+.parts-legend.show{display:flex}
+.parts-legend span{display:inline-flex;align-items:center;gap:6px}
+.parts-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.svg-hat{position:absolute;inset:0;display:grid;place-items:center}
+.svg-hat svg{width:min(78%,440px);height:auto}
+.shake{animation:shake .12s linear infinite}
+@keyframes shake{25%{transform:translate(-2px,1px) rotate(-.6deg)}75%{transform:translate(2px,-1px) rotate(.6deg)}}
+
+/* ---------- lab ---------- */
+.lab-card{display:flex;flex-direction:column;gap:16px}
+.lab-card .card-h{margin-bottom:0}
+.ctrl{background:var(--brand-50);border-radius:16px;padding:14px 16px}
+.ctrl-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ctrl-top label{display:flex;align-items:center;gap:8px;font-weight:600}
+.ctrl-top label .lucide{color:var(--brand)}
+.ctrl output{font-size:22px;font-weight:700;color:var(--brand-ink)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:10px;border-radius:999px;background:var(--brand-100);outline:none;margin:6px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--brand);box-shadow:0 2px 8px rgba(98,52,216,.35);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--brand);box-shadow:0 2px 8px rgba(98,52,216,.35);cursor:pointer}
+input[type=range]:disabled{opacity:.5}
+.range-scale{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);width:100%}
+.scen-h{font-weight:600;font-size:14px;color:var(--muted)}
+.scenarios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.scen{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:11px 12px;transition:border-color .2s,background .2s}
+.scen:hover{border-color:var(--brand-200);background:var(--brand-50)}
+.scen.active{border-color:var(--brand);background:var(--brand-50);box-shadow:inset 0 0 0 1px var(--brand)}
+.scen b{font-size:14px}
+.scen .num{font-size:12px;color:var(--muted)}
+.scen-dot{width:10px;height:10px;border-radius:50%;margin-bottom:4px}
+.lab-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.th-note{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:flex-start}
+.th-note .lucide{width:15px;height:15px;margin-top:2px;color:var(--brand)}
+
+/* ---------- sensors ---------- */
+.sensor{display:flex;flex-direction:column;gap:10px;transition:opacity .3s}
+.sensor-h{display:flex;align-items:center;gap:10px;font-weight:600}
+.ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none}
+.ic-temp{background:#FFEDE5;color:#E2541B}
+.ic-hum{background:#E3F0FF;color:#1D6FD8}
+.ic-hi{background:var(--brand-50);color:var(--brand)}
+.ic-uv{background:var(--off-bg);color:var(--off)}
+.sensor-val{display:flex;align-items:baseline;gap:6px;min-height:52px}
+.big{font-size:40px;font-weight:700;line-height:1.1;color:var(--brand-ink)}
+.unit{font-size:16px;color:var(--muted);font-weight:600;direction:ltr;unicode-bidi:isolate}
+.meter{position:relative;height:12px;border-radius:999px;background:var(--off-bg);margin-top:6px}
+.meter-track{position:absolute;inset:0;border-radius:999px}
+.meter-band{position:absolute;top:-3px;bottom:-3px;border:1.5px dashed rgba(29,111,216,.45);border-radius:999px}
+.meter-mark{position:absolute;top:50%;width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--brand-ink);transform:translate(50%,-50%);transition:inset-inline-start .25s ease;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+[dir=ltr] .meter-mark{transform:translate(-50%,-50%)}
+.meter-fill{position:absolute;inset-block:0;inset-inline-start:0;border-radius:999px;background:#4F95F0;opacity:.85;transition:width .25s ease}
+.meter-scale{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.sensor-foot{font-size:12.5px;color:var(--muted);min-height:20px}
+.sensor-foot.warn{color:#9A5B00}
+.hi-msg{font-size:14px;font-weight:500;color:var(--brand-ink);background:var(--brand-50);border-radius:12px;padding:10px 12px}
+.sensor.disabled{background:repeating-linear-gradient(-45deg,#FCFBFE,#FCFBFE 10px,#F6F4FA 10px,#F6F4FA 20px)}
+.sensor.disabled .big{color:var(--off-led)}
+.na{font-weight:700;color:var(--off)}
+.badge-future{font-size:11.5px;font-weight:600;color:var(--off);border:1px dashed var(--off-led);padding:2px 8px;border-radius:999px;margin-inline-start:auto}
+.dimmed .sensor{opacity:.55}
+
+/* ---------- monitoring ---------- */
+.stat{display:flex;flex-direction:column;gap:6px}
+.stat .lbl{color:var(--muted);font-size:13.5px;display:flex;gap:8px;align-items:center}
+.stat .val{font-size:22px;font-weight:700}
+.chart{width:100%;display:block;direction:ltr}
+.chart text{font-family:inherit;font-size:11px;fill:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:8px;border-radius:3px;display:inline-block}
+.events{list-style:none;margin:0;padding:0;max-height:420px;overflow:auto}
+.events li{display:flex;gap:12px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--border)}
+.events li:last-child{border-bottom:0}
+.ev-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--brand-50);color:var(--brand)}
+.ev-ic.red{background:var(--red-bg);color:var(--red)}
+.ev-ic.yellow{background:var(--yellow-bg);color:var(--yellow)}
+.ev-ic.green{background:var(--green-bg);color:var(--green)}
+.ev-body{flex:1;min-width:0;font-size:14px}
+.ev-body small{display:block;color:var(--muted);font-size:12.5px}
+.ev-time{font-size:12.5px;color:var(--muted)}
+.tbl-wrap{max-height:420px;overflow:auto;border-radius:12px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:9px 12px;text-align:start;border-bottom:1px solid var(--border);white-space:nowrap}
+th{position:sticky;top:0;background:var(--brand-50);color:var(--brand-ink);font-weight:600;font-size:13px}
+tr:last-child td{border-bottom:0}
+.src-note{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:flex-start;margin-top:10px}
+.src-note .lucide{width:15px;height:15px;margin-top:2px}
+
+/* ---------- hardware ---------- */
+.hw-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;margin-bottom:20px}
+.flow{display:grid;grid-template-columns:1fr 44px 1fr 44px 1fr 44px 1fr;grid-template-rows:auto auto;gap:18px 0;align-items:center;padding:12px 0}
+.node{border:1.5px solid var(--border);background:var(--surface);border-radius:16px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;transition:border-color .2s,box-shadow .2s,transform .15s}
+.node:hover{border-color:var(--brand-200);transform:translateY(-2px)}
+.node.active{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-100)}
+.node .ic{background:var(--brand-50);color:var(--brand)}
+.node b{font-size:15px;direction:ltr}
+.node small{color:var(--muted);font-size:12.5px;line-height:1.35}
+.arrow{display:grid;place-items:center;color:var(--brand-200)}
+.arrow .lucide{width:26px;height:26px}
+[dir=rtl] .arrow .lucide{transform:scaleX(-1)}
+.n-dht{grid-column:1;grid-row:1/3}
+.a1{grid-column:2;grid-row:1/3}
+.n-esp{grid-column:3;grid-row:1/3}
+.a2{grid-column:4;grid-row:1}
+.a3{grid-column:4;grid-row:2}
+.n-led{grid-column:5;grid-row:1}
+.n-drv{grid-column:5;grid-row:2}
+.a4{grid-column:6;grid-row:2}
+.n-mot{grid-column:7;grid-row:2}
+.a2 .lucide{transform:rotate(-25deg)}
+[dir=rtl] .a2 .lucide{transform:scaleX(-1) rotate(-25deg)}
+.a3 .lucide{transform:rotate(25deg)}
+[dir=rtl] .a3 .lucide{transform:scaleX(-1) rotate(25deg)}
+.detail h3{font-size:20px;color:var(--brand-ink);direction:ltr;text-align:start}
+.detail .role{color:var(--brand-600);font-weight:600;margin:2px 0 12px}
+.detail p{margin-bottom:12px}
+.detail ul{margin:0;padding-inline-start:20px;color:var(--text)}
+.detail li{margin-bottom:5px}
+.detail .in-proj{background:var(--brand-50);border-radius:12px;padding:12px 14px;margin:12px 0;font-size:14px}
+.detail .in-proj b{display:block;color:var(--brand-ink);margin-bottom:2px}
+.power-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.pwr{border-radius:16px;padding:18px;border:1.5px solid var(--border)}
+.pwr.active{border-color:#BFE6CC;background:var(--green-bg)}
+.pwr.future{border-style:dashed;background:#FCFBFE}
+.pwr h3{font-size:16px;display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.pwr ul{margin:8px 0 0;padding-inline-start:20px;font-size:14px}
+.parts-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.parts-list span{background:var(--brand-50);border-radius:10px;padding:6px 10px;font-size:13.5px}
+.note-box{display:flex;gap:10px;align-items:flex-start;background:#FFF9EC;border:1px solid #F3E2B5;border-radius:14px;padding:12px 14px;font-size:14px;margin-top:14px}
+.note-box .lucide{color:#B07800;margin-top:3px}
+
+/* ---------- settings ---------- */
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+.set-row:last-child{border-bottom:0}
+.set-row .t{font-weight:600}
+.set-row .d{font-size:13px;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:600;font-size:14px}
+.input,select{font:inherit;border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:#fff;color:var(--text);min-width:0}
+.input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-100)}
+.th-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.err{color:var(--red);font-size:13px;min-height:20px}
+.switch{position:relative;width:50px;height:28px;flex:none}
+.switch input{opacity:0;width:0;height:0;position:absolute}
+.switch span{position:absolute;inset:0;background:#D9D5E3;border-radius:999px;transition:background .2s;cursor:pointer}
+.switch span::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:inset-inline-start .2s}
+.switch input:checked+span{background:var(--brand)}
+.switch input:checked+span::after{inset-inline-start:25px}
+.switch input:focus-visible+span{outline:3px solid var(--brand-200);outline-offset:2px}
+.preview-bar{height:14px;border-radius:999px;margin:10px 0 4px}
+.disclaimer-inline{font-size:13px;color:#8A5300;background:#FFF9EC;border-radius:10px;padding:9px 12px;margin-top:12px;display:flex;gap:8px}
+.disclaimer-inline .lucide{width:16px;height:16px;margin-top:2px}
+
+/* ---------- api ---------- */
+.seg{display:inline-flex;background:var(--brand-50);border-radius:14px;padding:4px;gap:4px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;border-radius:10px;padding:9px 14px;font-weight:600;color:var(--muted);display:flex;gap:8px;align-items:center}
+.seg button.on{background:#fff;color:var(--brand-ink);box-shadow:0 1px 4px rgba(42,18,96,.12)}
+.seg button:disabled{opacity:.6}
+.soon{font-size:11px;background:var(--off-bg);color:var(--off);padding:1px 7px;border-radius:999px}
+pre{margin:0;direction:ltr;text-align:left;background:#1C1530;color:#E9E4FF;border-radius:14px;padding:16px 18px;overflow:auto;font-size:13.5px;line-height:1.6;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre .k{color:#B9A3FF}.pre .s{color:#9FE3B3}
+.layers{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.layers li{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:var(--brand-50)}
+.layers code{direction:ltr;unicode-bidi:isolate;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:#fff;border-radius:6px;padding:1px 6px;color:var(--brand-600)}
+.layers .n{width:28px;height:28px;border-radius:9px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+.layers small{display:block;color:var(--muted);font-size:13px}
+ol.steps{margin:0;padding-inline-start:22px}
+ol.steps li{margin-bottom:6px}
+
+/* ---------- footer / toast ---------- */
+.foot{border-top:1px solid var(--border);background:#fff}
+.foot .wrap{display:flex;gap:10px;align-items:flex-start;padding-top:16px;padding-bottom:16px;font-size:13.5px;color:var(--muted)}
+.foot .lucide{color:#B07800;margin-top:2px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);background:var(--brand-ink);color:#fff;padding:10px 18px;border-radius:12px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:50}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){
+  .g-sensors,.g-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hw-layout{grid-template-columns:1fr}
+}
+@media (max-width:960px){
+  .g-hero,.g-main,.g-2{grid-template-columns:1fr}
+  .tabs{order:5;width:100%;margin-inline-start:0;padding-bottom:10px}
+  .top-actions{margin-inline-start:auto}
+  .flow{grid-template-columns:1fr;gap:8px}
+  .flow>*{grid-column:1!important;grid-row:auto!important}
+  .arrow .lucide,[dir=rtl] .arrow .lucide{transform:rotate(90deg)!important}
+}
+@media (max-width:620px){
+  .wrap{padding:0 14px}
+  .g-sensors,.g-stats,.power-grid,.th-grid{grid-template-columns:1fr}
+  .scenarios{grid-template-columns:1fr}
+  .alert-hero{flex-direction:column;align-items:flex-start;padding:20px}
+  .hero-led{width:80px;height:80px}.led-dot{width:44px;height:44px}
+  .hero-level{font-size:24px}
+  .mode-badge{display:none}
+  .hat-stage{min-height:320px}
+  .big{font-size:34px}
+}
+@media (min-width:1700px){ body{font-size:16px} .big{font-size:46px} .hat-stage{min-height:460px} }
+@media (prefers-reduced-motion:reduce){ *{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important} }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="#dashboard" aria-label="THILLI">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <rect width="40" height="40" rx="12" fill="#6234D8"/>
+        <path d="M8.5 25.5c0-7.4 5-12.5 11.5-12.5S31.5 18.1 31.5 25.5z" fill="#fff"/>
+        <path d="M20 25.5h14.5c0 1.9-1.6 3.4-3.5 3.4H20z" fill="#D8CBFF"/>
+        <rect x="8.5" y="24" width="23" height="2.4" rx="1.2" fill="#ECE4FF"/>
+        <circle id="brandLed" cx="22.5" cy="18.6" r="2.3" fill="#22C55E"/>
+      </svg>
+      <span class="brand-txt"><b>THILLI</b><span class="brand-ar">ظِلّي</span></span>
+    </a>
+    <span class="mode-badge"><span class="pulse-dot"></span><span data-i18n="modeSim"></span></span>
+    <nav class="tabs" id="tabs" aria-label="Sections">
+      <a href="#dashboard" data-route="dashboard"><i data-lucide="layout-dashboard"></i><span data-i18n="navDashboard"></span></a>
+      <a href="#monitoring" data-route="monitoring"><i data-lucide="activity"></i><span data-i18n="navMonitoring"></span></a>
+      <a href="#hardware" data-route="hardware"><i data-lucide="cpu"></i><span data-i18n="navHardware"></span></a>
+      <a href="#config" data-route="config"><i data-lucide="sliders-horizontal"></i><span data-i18n="navConfig"></span></a>
+      <a href="#api" data-route="api"><i data-lucide="plug-zap"></i><span data-i18n="navApi"></span></a>
+    </nav>
+    <div class="top-actions">
+      <button class="btn ghost sm" id="langBtn"><i data-lucide="languages"></i><span id="langBtnTxt">English</span></button>
+      <button class="btn power sm" id="powerBtn"><i data-lucide="power"></i><span id="powerBtnTxt"></span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ================= DASHBOARD ================= -->
+<section class="view" data-view="dashboard">
+  <div class="grid g-hero">
+    <div class="card alert-hero" id="alertHero" data-level="green" aria-live="polite">
+      <div class="hero-led"><span class="led-dot"></span></div>
+      <div class="hero-body">
+        <div class="eyebrow" data-i18n="currentAlert"></div>
+        <div class="hero-level" id="heroLevel"></div>
+        <p class="hero-msg" id="heroMsg"></p>
+        <div class="chips">
+          <span class="chip" id="chipLed"><i data-lucide="lightbulb"></i><span id="chipLedTxt"></span></span>
+          <span class="chip" id="chipMotor"><i data-lucide="vibrate"></i><span id="chipMotorTxt"></span></span>
+          <span class="chip sim"><i data-lucide="flask-conical"></i><span data-i18n="simData"></span></span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><i data-lucide="hard-hat"></i><h2 data-i18n="hatStatus"></h2></div>
+      <dl class="kv">
+        <div><dt data-i18n="deviceName"></dt><dd id="stName"></dd></div>
+        <div><dt data-i18n="powerState"></dt><dd id="stPower"></dd></div>
+        <div><dt data-i18n="opMode"></dt><dd><span class="pill brand" data-i18n="modeSimShort"></span></dd></div>
+        <div><dt data-i18n="alertState"></dt><dd id="stAlert"></dd></div>
+        <div><dt data-i18n="lastUpdate"></dt><dd><span id="stUpdated" class="num">—</span></dd></div>
+        <div><dt data-i18n="connection"></dt><dd id="stConn"></dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <div class="grid g-main">
+    <div class="card hat-card">
+      <div class="card-h">
+        <i data-lucide="box"></i><h2 id="hatTitle"></h2><span class="spacer"></span>
+        <button class="btn ghost sm" id="partsBtn"><i data-lucide="layers"></i><span id="partsBtnTxt"></span></button>
+      </div>
+      <div class="hat-stage" id="hatStage">
+        <div class="hat-labels" id="hatLabels"></div>
+        <div class="hat-zoom" id="hatZoom">
+          <button class="icon-btn" id="zoomIn" aria-label="Zoom in"><i data-lucide="zoom-in"></i></button>
+          <button class="icon-btn" id="zoomOut" aria-label="Zoom out"><i data-lucide="zoom-out"></i></button>
+          <button class="icon-btn" id="viewReset" aria-label="Reset view"><i data-lucide="rotate-ccw"></i></button>
+        </div>
+      </div>
+      <div class="parts-legend" id="partsLegend"></div>
+      <p class="hat-hint" id="hatHint"></p>
+    </div>
+
+    <div class="card lab-card">
+      <div class="card-h"><i data-lucide="flask-conical"></i><h2 data-i18n="labTitle"></h2><span class="spacer"></span><span class="tag">Simulation Lab</span></div>
+      <p class="sub" data-i18n="labSub"></p>
+      <div class="ctrl">
+        <div class="ctrl-top">
+          <label for="slTemp"><i data-lucide="thermometer"></i><span data-i18n="temp"></span></label>
+          <output id="outTemp" class="num">25.0°C</output>
+        </div>
+        <input type="range" id="slTemp" min="0" max="50" step="0.5" value="25">
+        <div class="range-scale"><span class="num">0°C</span><span class="num">50°C</span></div>
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-top">
+          <label for="slHum"><i data-lucide="droplets"></i><span data-i18n="hum"></span></label>
+          <output id="outHum" class="num">40%</output>
+        </div>
+        <input type="range" id="slHum" min="0" max="100" step="1" value="40">
+        <div class="range-scale"><span class="num">0%</span><span class="num">100%</span></div>
+      </div>
+      <div class="scen-h" data-i18n="scenarios"></div>
+      <div class="scenarios">
+        <button class="scen" data-scen="mild"><span class="scen-dot" style="background:var(--green-led)"></span><b data-i18n="scMild"></b><span class="num">25°C · 40%</span></button>
+        <button class="scen" data-scen="hot"><span class="scen-dot" style="background:var(--yellow-led)"></span><b data-i18n="scHot"></b><span class="num">32°C · 50%</span></button>
+        <button class="scen" data-scen="extreme"><span class="scen-dot" style="background:var(--red-led)"></span><b data-i18n="scExtreme"></b><span class="num">38°C · 60%</span></button>
+      </div>
+      <div class="lab-foot">
+        <p class="th-note"><i data-lucide="info"></i><span id="thNote"></span></p>
+        <button class="btn ghost sm" id="labReset"><i data-lucide="rotate-ccw"></i><span data-i18n="reset"></span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g-sensors" id="sensorGrid">
+    <div class="card sensor">
+      <div class="sensor-h"><span class="ic ic-temp"><i data-lucide="thermometer"></i></span><span data-i18n="temp"></span></div>
+      <div class="sensor-val"><span class="num big" id="valTemp">—</span><span class="unit">°C</span></div>
+      <div class="meter"><div class="meter-track" id="trackTemp"></div><div class="meter-mark" id="markTemp"></div></div>
+      <div class="meter-scale"><span class="num">0</span><span class="num">50°C</span></div>
+      <p class="sensor-foot" id="footTemp"></p>
+    </div>
+    <div class="card sensor">
+      <div class="sensor-h"><span class="ic ic-hum"><i data-lucide="droplets"></i></span><span data-i18n="hum"></span></div>
+      <div class="sensor-val"><span class="num big" id="valHum">—</span><span class="unit">%</span></div>
+      <div class="meter"><div class="meter-band" id="bandHum"></div><div class="meter-fill" id="fillHum"></div><div class="meter-mark" id="markHum"></div></div>
+      <div class="meter-scale"><span class="num">0</span><span class="num">100%</span></div>
+      <p class="sensor-foot" id="footHum"></p>
+    </div>
+    <div class="card sensor">
+      <div class="sensor-h"><span class="ic ic-hi"><i data-lucide="gauge"></i></span><span data-i18n="hi"></span><span class="tag">Heat Index</span></div>
+      <div class="sensor-val" id="hiValWrap"><span class="num big" id="valHi">—</span><span class="unit">°C</span></div>
+      <p class="hi-msg" id="hiMsg" hidden></p>
+      <p class="sensor-foot" data-i18n="hiNote"></p>
+    </div>
+    <div class="card sensor disabled" aria-disabled="true">
+      <div class="sensor-h"><span class="ic ic-uv"><i data-lucide="sun"></i></span><span data-i18n="uv"></span><span class="badge-future" data-i18n="future"></span></div>
+      <div class="sensor-val"><span class="na" data-i18n="uvNA"></span></div>
+      <p class="sensor-foot" data-i18n="uvFoot"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MONITORING ================= -->
+<section class="view" data-view="monitoring">
+  <div class="page-h"><h1>System Monitoring · <span data-i18n="navMonitoring"></span></h1><p data-i18n="monSub"></p></div>
+  <div class="grid g-stats">
+    <div class="card stat"><span class="lbl"><i data-lucide="siren"></i><span data-i18n="alertState"></span></span><span class="val" id="msLevel"></span></div>
+    <div class="card stat"><span class="lbl"><i data-lucide="list"></i><span data-i18n="readingsCount"></span></span><span class="val num" id="msCount">0</span></div>
+    <div class="card stat"><span class="lbl"><i data-lucide="triangle-alert"></i><span data-i18n="enteredYellow"></span></span><span class="val" id="msYellow"></span></div>
+    <div class="card stat"><span class="lbl"><i data-lucide="flame"></i><span data-i18n="enteredRed"></span></span><span class="val" id="msRed"></span></div>
+  </div>
+  <div class="grid g-2">
+    <div class="card">
+      <div class="card-h"><i data-lucide="thermometer"></i><h2 data-i18n="tempChart"></h2></div>
+      <svg class="chart" id="chartTemp" height="230"></svg>
+      <div class="legend"><span><i style="background:var(--brand)"></i><span data-i18n="temp"></span></span><span><i style="background:rgba(250,204,21,.45)"></i><span data-i18n="yellowZone"></span></span><span><i style="background:rgba(239,68,68,.3)"></i><span data-i18n="redZone"></span></span></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><i data-lucide="droplets"></i><h2 data-i18n="humChart"></h2></div>
+      <svg class="chart" id="chartHum" height="230"></svg>
+      <div class="legend"><span><i style="background:#1D6FD8"></i><span data-i18n="hum"></span></span><span><i style="background:rgba(29,111,216,.12);outline:1px dashed rgba(29,111,216,.5)"></i><span data-i18n="dhtRangeLeg"></span></span></div>
+    </div>
+  </div>
+  <div class="grid g-2">
+    <div class="card">
+      <div class="card-h"><i data-lucide="history"></i><h2 data-i18n="eventsTitle"></h2><span class="spacer"></span><button class="btn ghost sm" id="clearLog"><i data-lucide="trash-2"></i><span data-i18n="clearLog"></span></button></div>
+      <ul class="events" id="eventsList"></ul>
+    </div>
+    <div class="card">
+      <div class="card-h"><i data-lucide="table"></i><h2 data-i18n="readingsTitle"></h2></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th data-i18n="colTime"></th><th data-i18n="temp"></th><th data-i18n="hum"></th><th data-i18n="hi"></th><th data-i18n="colLevel"></th></tr></thead>
+        <tbody id="readingsBody"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <p class="src-note"><i data-lucide="info"></i><span data-i18n="sourceNote"></span></p>
+</section>
+
+<!-- ================= HARDWARE ================= -->
+<section class="view" data-view="hardware">
+  <div class="page-h"><h1>Hardware Architecture · <span data-i18n="navHardware"></span></h1><p data-i18n="hwSub"></p></div>
+  <div class="hw-layout">
+    <div class="card">
+      <div class="card-h"><i data-lucide="workflow"></i><h2 data-i18n="flowTitle"></h2></div>
+      <div class="flow" id="flow">
+        <button class="node n-dht" data-hw="dht11"><span class="ic"><i data-lucide="thermometer"></i></span><b>DHT11</b><small data-hwrole="dht11"></small></button>
+        <div class="arrow a1"><i data-lucide="arrow-right"></i></div>
+        <button class="node n-esp" data-hw="esp32"><span class="ic"><i data-lucide="cpu"></i></span><b>ESP32</b><small data-hwrole="esp32"></small></button>
+        <div class="arrow a2"><i data-lucide="arrow-right"></i></div>
+        <div class="arrow a3"><i data-lucide="arrow-right"></i></div>
+        <button class="node n-led" data-hw="led"><span class="ic"><i data-lucide="lightbulb"></i></span><b>RGB LED</b><small data-hwrole="led"></small></button>
+        <button class="node n-drv" data-hw="l9110s"><span class="ic"><i data-lucide="circuit-board"></i></span><b>L9110S</b><small data-hwrole="l9110s"></small></button>
+        <div class="arrow a4"><i data-lucide="arrow-right"></i></div>
+        <button class="node n-mot" data-hw="motor"><span class="ic"><i data-lucide="vibrate"></i></span><b>Vibration Motor</b><small data-hwrole="motor"></small></button>
+      </div>
+      <div class="note-box"><i data-lucide="info"></i><span data-i18n="verifyNote"></span></div>
+    </div>
+    <div class="card detail" id="hwDetail"></div>
+  </div>
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-h"><i data-lucide="battery-charging"></i><h2 data-i18n="powerTitle"></h2></div>
+    <div class="power-grid">
+      <div class="pwr active">
+        <h3><i data-lucide="usb"></i><span data-i18n="pwrUsb"></span><span class="pill green" data-i18n="pwrUsbBadge"></span></h3>
+        <p data-i18n="pwrUsbDesc"></p>
+      </div>
+      <div class="pwr future">
+        <h3><i data-lucide="battery"></i><span data-i18n="pwrBat"></span><span class="pill off" data-i18n="pwrBatBadge"></span></h3>
+        <p data-i18n="pwrBatDesc"></p>
+        <ul><li>Li-Po Battery</li><li>USB-C Battery Charging Module</li><li>Slide Switch</li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><i data-lucide="package"></i><h2 data-i18n="auxTitle"></h2></div>
+    <div class="parts-list" id="auxList"></div>
+    <div class="note-box"><i data-lucide="circle-help"></i><span data-i18n="unknownPart"></span></div>
+  </div>
+</section>
+
+<!-- ================= SETTINGS ================= -->
+<section class="view" data-view="config">
+  <div class="page-h"><h1 data-i18n="navConfig"></h1><p data-i18n="setSub"></p></div>
+  <div class="grid g-2">
+    <div class="card">
+      <div class="card-h"><i data-lucide="sliders-horizontal"></i><h2 data-i18n="thTitle"></h2></div>
+      <div class="th-grid">
+        <div class="field"><label for="inYellow" data-i18n="yellowFrom"></label><input class="input num" style="direction:ltr" type="number" id="inYellow" min="0" max="50" step="0.5"></div>
+        <div class="field"><label for="inRed" data-i18n="redFrom"></label><input class="input num" style="direction:ltr" type="number" id="inRed" min="0" max="50" step="0.5"></div>
+      </div>
+      <p class="err" id="thErr" role="alert"></p>
+      <div class="preview-bar" id="thPreview"></div>
+      <div class="meter-scale"><span class="num">0°C</span><span class="num">50°C</span></div>
+      <p class="disclaimer-inline"><i data-lucide="triangle-alert"></i><span data-i18n="thDisclaimer"></span></p>
+    </div>
+    <div class="card">
+      <div class="card-h"><i data-lucide="settings-2"></i><h2 data-i18n="prefsTitle"></h2></div>
+      <div class="set-row"><div><div class="t" data-i18n="vibSim"></div><div class="d" data-i18n="vibSimD"></div></div><label class="switch"><input type="checkbox" id="swVib"><span></span></label></div>
+      <div class="set-row"><div><div class="t" data-i18n="sound"></div><div class="d" data-i18n="soundD"></div></div><label class="switch"><input type="checkbox" id="swSound"><span></span></label></div>
+      <div class="set-row"><div class="field" style="flex:1"><label for="inName" data-i18n="deviceName"></label><input class="input" id="inName" maxlength="40"></div></div>
+      <div class="set-row"><div class="field" style="flex:1"><label for="selLang" data-i18n="language"></label><select id="selLang"><option value="ar">العربية</option><option value="en">English</option></select></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><i data-lucide="rotate-ccw"></i><h2 data-i18n="resetTitle"></h2></div>
+    <div class="set-row"><div><div class="t" data-i18n="resetSim"></div><div class="d" data-i18n="resetSimD"></div></div><button class="btn ghost" id="setResetSim"><i data-lucide="rotate-ccw"></i><span data-i18n="resetSim"></span></button></div>
+    <div class="set-row"><div><div class="t" data-i18n="resetAll"></div><div class="d" data-i18n="resetAllD"></div></div><button class="btn danger" id="setResetAll"><i data-lucide="undo-2"></i><span data-i18n="resetAll"></span></button></div>
+    <p class="sub" id="storageNote" style="margin-top:10px"></p>
+  </div>
+</section>
+
+<!-- ================= API / ESP32 ================= -->
+<section class="view" data-view="api">
+  <div class="page-h"><h1 data-i18n="apiTitle"></h1><p data-i18n="apiSub"></p></div>
+  <div class="grid g-2">
+    <div class="card">
+      <div class="card-h"><i data-lucide="radio"></i><h2 data-i18n="modeTitle"></h2></div>
+      <div class="seg">
+        <button class="on"><i data-lucide="flask-conical"></i>Simulation Mode · <span data-i18n="modeSimShort"></span></button>
+        <button disabled id="liveBtn"><i data-lucide="wifi"></i>Live Device Mode <span class="soon" data-i18n="soon"></span></button>
+      </div>
+      <p class="sub" style="margin-top:12px" data-i18n="liveNote"></p>
+      <div class="card-h" style="margin-top:22px"><i data-lucide="braces"></i><h2 data-i18n="payloadTitle"></h2><span class="spacer"></span><button class="btn ghost sm" id="copyJson"><i data-lucide="copy"></i><span data-i18n="copy"></span></button></div>
+      <pre id="jsonPreview"></pre>
+      <p class="disclaimer-inline"><i data-lucide="info"></i><span data-i18n="payloadNote"></span></p>
+    </div>
+    <div class="card">
+      <div class="card-h"><i data-lucide="layers"></i><h2 data-i18n="layersTitle"></h2></div>
+      <ul class="layers" id="layersList"></ul>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-h"><i data-lucide="terminal"></i><h2 data-i18n="runTitle"></h2></div>
+    <ol class="steps" id="runSteps"></ol>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="wrap"><i data-lucide="shield-alert"></i><span data-i18n="disclaimer"></span></div></footer>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script>
+(() => {
+'use strict';
+
+/* =====================================================================
+   1) CONFIG
+   ===================================================================== */
+const STORAGE_KEY = 'thilli.settings.v1';
+const DEFAULT_SETTINGS = { deviceName:'THILLI Smart Hat', lang:'ar', yellowAt:30, redAt:35, vibration:true, sound:false };
+const SIM_DEFAULT = { temperature:25, humidity:40 };
+const SCENARIOS = { mild:{temperature:25,humidity:40}, hot:{temperature:32,humidity:50}, extreme:{temperature:38,humidity:60} };
+const SAMPLE_MS = 2000;        // periodic sampling while the hat is on
+const MIN_RECORD_GAP = 1000;   // throttle for slider-driven records
+const HISTORY_MAX = 60, TABLE_ROWS = 20, EVENTS_MAX = 60;
+const DEVICE_ID = 'THILLI-001';
+const DHT11_RANGE = { tMin:0, tMax:50, hMin:20, hMax:90 };
+const LED_HEX = { green:'#22C55E', yellow:'#FACC15', red:'#EF4444', off:'#B9B4C6' };
+
+/* =====================================================================
+   2) I18N
+   ===================================================================== */
+const I18N = {
+ar:{
+  modeSim:'وضع المحاكاة – Simulation Mode', modeSimShort:'محاكاة',
+  navDashboard:'لوحة التحكم', navMonitoring:'مراقبة النظام', navHardware:'المعمارية الإلكترونية', navConfig:'الإعدادات', navApi:'الربط مع ESP32',
+  powerOn:'يعمل', powerOff:'متوقف', turnOff:'إيقاف القبعة', turnOn:'تشغيل القبعة',
+  currentAlert:'حالة التنبيه الحالية', hatStatus:'حالة القبعة', deviceName:'اسم الجهاز', powerState:'حالة التشغيل', opMode:'وضع التشغيل', alertState:'حالة التنبيه', lastUpdate:'آخر تحديث', connection:'الاتصال',
+  connVirtual:'متصل افتراضيًا', connVirtualNote:'اتصال محاكاة — لا يوجد جهاز حقيقي', connOff:'غير نشط',
+  lv_green:'المستوى الأخضر', lv_yellow:'المستوى الأصفر', lv_red:'المستوى الأحمر', lv_off:'القبعة متوقفة',
+  s_green:'أخضر', s_yellow:'أصفر', s_red:'أحمر', s_off:'متوقف',
+  msg_green:'الظروف ضمن المستوى الطبيعي للتجربة', msg_yellow:'تنبيه: يُنصح بالحذر ومراجعة الظروف', msg_red:'تنبيه مرتفع: يُنصح بالانتقال إلى مكان مناسب ومراجعة حالة الطفل', msg_off:'لا توجد قراءات جديدة — شغّل القبعة لاستئناف المحاكاة',
+  ledIs:'مؤشر RGB: {c}', motorIs:'محرك الاهتزاز: {s}', motorOn:'يعمل', motorOff:'متوقف', motorOnNoVis:'يعمل (الاهتزاز المرئي معطّل)',
+  simData:'بيانات تجريبية',
+  hat3d:'نموذج القبعة ثلاثي الأبعاد', hat2d:'نموذج القبعة (عرض ثنائي الأبعاد)',
+  hint3d:'اسحب لتدوير القبعة • استخدم عجلة الماوس أو الأزرار للتكبير والتصغير', hint2d:'تعذّر تشغيل WebGL أو تحميل Three.js في هذا المتصفح، لذا يُعرض بديل ثنائي الأبعاد تفاعلي (ليس 3D).',
+  showParts:'إظهار القطع', hideParts:'إخفاء القطع', partsNote:'مواقع القطع توضيحية تقريبية وليست تصميمًا ميكانيكيًا نهائيًا.',
+  p_esp32:'ESP32', p_dht11:'DHT11', p_led:'RGB LED', p_motor:'محرك الاهتزاز', p_power:'مصدر الطاقة',
+  labTitle:'مختبر المحاكاة', labSub:'غيّر الظروف البيئية يدويًا وراقب استجابة القبعة فورًا.', temp:'درجة الحرارة', hum:'الرطوبة النسبية', hi:'مؤشر الحرارة', uv:'الأشعة فوق البنفسجية',
+  scenarios:'سيناريوهات تجريبية جاهزة', scMild:'ظروف معتدلة', scHot:'ظروف حارة', scExtreme:'شديدة الحرارة', reset:'إعادة الضبط',
+  thNote:'حدود العرض الحالية: أصفر من {y}، أحمر من {r} — لعرض الوظيفة البرمجية فقط وليست حدود سلامة طبية.',
+  tempFoot:'المستوى حسب الحدود التجريبية: {l}', humFoot:'ضمن نطاق القياس النموذجي لحساس DHT11 (20–90%)', humOut:'خارج نطاق القياس النموذجي لحساس DHT11 (20–90%) — قيمة محاكاة فقط',
+  hiNote:'قيمة تقديرية محسوبة بمعادلة Rothfusz (NWS) وليست قياسًا مباشرًا، ولا تؤثر على مستوى التنبيه.',
+  hi_lowTemp:'خارج نطاق صلاحية المعادلة: تتطلب درجة حرارة 26.7°C فأعلى. لا تُعرض قيمة لتجنّب نتيجة مضللة.',
+  hi_lowRH:'خارج نطاق صلاحية المعادلة: تتطلب رطوبة 40% فأعلى. لا تُعرض قيمة لتجنّب نتيجة مضللة.',
+  hi_high:'النتيجة تتجاوز نطاق الجداول المرجعية للمعادلة؛ لا تُعرض قيمة رقمية.',
+  future:'مستقبلي', uvNA:'غير متوفر في النموذج الحالي', uvFoot:'لا يوجد حساس UV ضمن القطع الحالية؛ لذلك لا يولّد التطبيق أي قراءة UV.',
+  monSub:'رسوم بيانية وسجلات مبنية فقط من قيم مختبر المحاكاة التي تختارها.', readingsCount:'القراءات المسجلة', enteredYellow:'آخر دخول للمستوى الأصفر', enteredRed:'آخر دخول للمستوى الأحمر', never:'لم يحدث بعد',
+  tempChart:'درجة الحرارة – مباشر', humChart:'الرطوبة – مباشر', yellowZone:'منطقة الأصفر', redZone:'منطقة الأحمر', dhtRangeLeg:'نطاق DHT11',
+  eventsTitle:'سجل تغيّر حالات التنبيه', clearLog:'مسح السجل', readingsTitle:'آخر 20 قراءة', colTime:'الوقت', colLevel:'المستوى',
+  emptyEvents:'لا توجد أحداث بعد.', emptyReadings:'لا توجد قراءات بعد.', noData:'بانتظار قراءات المحاكاة',
+  ev_start:'بدء التشغيل على {to}', ev_change:'تغيّر من {from} إلى {to}', ev_off:'إيقاف القبعة', ev_at:'عند {t} · رطوبة {h}',
+  sourceNote:'مصدر جميع البيانات هو مختبر المحاكاة: تُسجَّل قراءة كل ثانيتين أثناء التشغيل وعند تغيير القيم. لا توجد بيانات من جهاز حقيقي.',
+  hwSub:'اضغط على أي مكوّن لقراءة وظيفته ودوره في المشروع.', flowTitle:'تسلسل عمل الجهاز', inProject:'دوره في THILLI',
+  st_available:'متوفر لدى الفريق',
+  verifyNote:'لم يُتحقق بعد من التشغيل الكامل للنموذج الحقيقي؛ أُنجزت محاكاة وظيفية باستخدام Wokwi وTinkercad.',
+  powerTitle:'حالة التغذية', pwrUsb:'USB أثناء التطوير', pwrUsbBadge:'المعتمد حاليًا', pwrUsbDesc:'تُغذّى لوحة ESP32 عبر كابل USB أثناء التطوير والاختبار على Breadboard.',
+  pwrBat:'البطارية والشحن', pwrBatBadge:'مرحلة مستقبلية', pwrBatDesc:'مسار التغذية المحمولة غير معتمد للتشغيل حتى التحقق من التصميم الكهربائي (الجهد، الحماية، وتيار المحرك).',
+  auxTitle:'قطع مساعدة', unknownPart:'يوجد مكوّن أسود ثلاثي الأطراف غير محدد الوظيفة بدقة؛ لا يُفترض استخدامه في التصميم الحالي حتى التعرف عليه.',
+  setSub:'تُحفظ التفضيلات محليًا في هذا المتصفح إن كان ذلك متاحًا.', thTitle:'حدود التنبيه التجريبية', yellowFrom:'بداية المستوى الأصفر (°C)', redFrom:'بداية المستوى الأحمر (°C)',
+  thErr:'يجب أن تكون بداية الأحمر أعلى من بداية الأصفر، وكلاهما بين 0 و50°C.',
+  thDisclaimer:'هذه الحدود مخصصة لعرض الوظيفة البرمجية فقط، وليست حدود سلامة طبية أو معيارًا معتمدًا للأطفال.',
+  prefsTitle:'التفضيلات', vibSim:'محاكاة الاهتزاز', vibSimD:'إظهار اهتزاز مرئي للقبعة في المستوى الأحمر', sound:'المؤثرات الصوتية', soundD:'نغمة قصيرة عند الانتقال إلى الأصفر أو الأحمر', language:'اللغة',
+  resetTitle:'إعادة الضبط', resetSim:'إعادة ضبط المحاكاة', resetSimD:'إرجاع القيم إلى 25°C و40% ومسح السجلات والرسوم', resetAll:'استعادة الإعدادات الافتراضية', resetAllD:'إرجاع الحدود والتفضيلات واسم الجهاز إلى قيمها الأصلية',
+  saved:'تم الحفظ', storageOk:'التخزين المحلي متاح: تُحفظ الإعدادات تلقائيًا.', storageNA:'التخزين المحلي غير متاح هنا: ستُفقد الإعدادات عند إغلاق الصفحة.',
+  apiTitle:'الجاهزية للربط مع ESP32', apiSub:'التطبيق مفصول إلى طبقات بحيث يُستبدل مصدر البيانات لاحقًا دون تغيير الواجهة.',
+  modeTitle:'وضع التشغيل', soon:'قيد التطوير', liveNote:'وضع الجهاز الحقيقي غير مفعّل: لا يحاول التطبيق الاتصال بأي جهاز. سيُفعّل بعد اختيار Wi-Fi أو BLE وبرمجة واجهة الاتصال.',
+  payloadTitle:'صيغة البيانات المقترحة', copy:'نسخ', copied:'تم النسخ', copyFail:'تعذّر النسخ — حدّد النص يدويًا',
+  payloadNote:'صيغة مقترحة لتبادل البيانات وليست بروتوكولًا مطبقًا حاليًا. القيم المعروضة مأخوذة من المحاكاة الجارية.',
+  layersTitle:'طبقات التطبيق', runTitle:'التشغيل محليًا',
+  disclaimer:'THILLI نموذج أولي تعليمي وابتكاري. مستويات التنبيه ليست تشخيصًا طبيًا ولا ضمانًا لسلامة الأطفال من الإجهاد الحراري، وجميع القراءات المعروضة بيانات محاكاة.',
+  langBtn:'English'
+},
+en:{
+  modeSim:'Simulation Mode', modeSimShort:'Simulation',
+  navDashboard:'Dashboard', navMonitoring:'System Monitoring', navHardware:'Hardware Architecture', navConfig:'Settings', navApi:'ESP32 Integration',
+  powerOn:'On', powerOff:'Off', turnOff:'Turn hat off', turnOn:'Turn hat on',
+  currentAlert:'Current alert state', hatStatus:'Hat status', deviceName:'Device name', powerState:'Power', opMode:'Operating mode', alertState:'Alert state', lastUpdate:'Last update', connection:'Connection',
+  connVirtual:'Virtually connected', connVirtualNote:'Simulated link — no real device', connOff:'Inactive',
+  lv_green:'Green level', lv_yellow:'Yellow level', lv_red:'Red level', lv_off:'Hat is off',
+  s_green:'Green', s_yellow:'Yellow', s_red:'Red', s_off:'Off',
+  msg_green:'Conditions are within the normal range for this demo', msg_yellow:'Caution: take care and review the conditions', msg_red:'High alert: move to a suitable place and check on the child', msg_off:'No new readings — turn the hat on to resume the simulation',
+  ledIs:'RGB LED: {c}', motorIs:'Vibration motor: {s}', motorOn:'On', motorOff:'Off', motorOnNoVis:'On (visual vibration disabled)',
+  simData:'Simulated data',
+  hat3d:'Interactive 3D hat model', hat2d:'Hat model (2D view)',
+  hint3d:'Drag to rotate • Use the mouse wheel or buttons to zoom', hint2d:'WebGL or Three.js is unavailable in this browser, so an interactive 2D fallback is shown (not 3D).',
+  showParts:'Show parts', hideParts:'Hide parts', partsNote:'Part positions are illustrative, not a final mechanical design.',
+  p_esp32:'ESP32', p_dht11:'DHT11', p_led:'RGB LED', p_motor:'Vibration motor', p_power:'Power source',
+  labTitle:'Simulation Lab', labSub:'Change the environmental conditions by hand and watch the hat respond instantly.', temp:'Temperature', hum:'Relative humidity', hi:'Heat index', uv:'Ultraviolet (UV)',
+  scenarios:'Ready-made test scenarios', scMild:'Mild', scHot:'Hot', scExtreme:'Extreme heat', reset:'Reset',
+  thNote:'Current demo thresholds: yellow from {y}, red from {r} — for showing the software logic only, not medical safety limits.',
+  tempFoot:'Level by demo thresholds: {l}', humFoot:'Within the DHT11 typical measuring range (20–90%)', humOut:'Outside the DHT11 typical measuring range (20–90%) — simulated value only',
+  hiNote:'An estimate computed with the Rothfusz (NWS) regression, not a direct measurement. It does not affect the alert level.',
+  hi_lowTemp:'Outside the formula\'s valid range: needs 26.7°C or higher. No value shown to avoid a misleading result.',
+  hi_lowRH:'Outside the formula\'s valid range: needs 40% humidity or higher. No value shown to avoid a misleading result.',
+  hi_high:'Result exceeds the formula\'s reference-table range; no number is shown.',
+  future:'Future', uvNA:'Not available in the current prototype', uvFoot:'There is no UV sensor among the current parts, so the app generates no UV readings.',
+  monSub:'Charts and logs built only from the Simulation Lab values you choose.', readingsCount:'Recorded readings', enteredYellow:'Last entered yellow', enteredRed:'Last entered red', never:'Not yet',
+  tempChart:'Temperature – live', humChart:'Humidity – live', yellowZone:'Yellow zone', redZone:'Red zone', dhtRangeLeg:'DHT11 range',
+  eventsTitle:'Alert state log', clearLog:'Clear log', readingsTitle:'Last 20 readings', colTime:'Time', colLevel:'Level',
+  emptyEvents:'No events yet.', emptyReadings:'No readings yet.', noData:'Waiting for simulated readings',
+  ev_start:'Started at {to}', ev_change:'Changed from {from} to {to}', ev_off:'Hat turned off', ev_at:'at {t} · {h} humidity',
+  sourceNote:'All data comes from the Simulation Lab: a reading is recorded every 2 seconds while on, and whenever values change. No data comes from a real device.',
+  hwSub:'Click any component to read what it does and how it fits the project.', flowTitle:'Device signal flow', inProject:'Role in THILLI',
+  st_available:'Available to the team',
+  verifyNote:'Full operation of the physical prototype has not been verified yet; functional simulation was done in Wokwi and Tinkercad.',
+  powerTitle:'Power status', pwrUsb:'USB during development', pwrUsbBadge:'Current', pwrUsbDesc:'The ESP32 board is powered over USB while developing and testing on the breadboard.',
+  pwrBat:'Battery & charging', pwrBatBadge:'Future stage', pwrBatDesc:'The portable power path is not approved for operation until the electrical design is verified (voltage, protection and motor current).',
+  auxTitle:'Supporting parts', unknownPart:'There is also an unidentified black three-pin component; it is not assumed to be part of the current design until identified.',
+  setSub:'Preferences are saved locally in this browser when available.', thTitle:'Demo alert thresholds', yellowFrom:'Yellow starts at (°C)', redFrom:'Red starts at (°C)',
+  thErr:'Red must start above yellow, and both must be between 0 and 50°C.',
+  thDisclaimer:'These thresholds only demonstrate the software logic. They are not medical safety limits or an approved standard for children.',
+  prefsTitle:'Preferences', vibSim:'Vibration simulation', vibSimD:'Show a visual shake of the hat at the red level', sound:'Sound effects', soundD:'Short tone when entering yellow or red', language:'Language',
+  resetTitle:'Reset', resetSim:'Reset simulation', resetSimD:'Return to 25°C and 40%, and clear logs and charts', resetAll:'Restore default settings', resetAllD:'Return thresholds, preferences and device name to their defaults',
+  saved:'Saved', storageOk:'Local storage is available: settings save automatically.', storageNA:'Local storage is unavailable here: settings will be lost when the page closes.',
+  apiTitle:'Ready for ESP32 integration', apiSub:'The app is split into layers so the data source can be swapped later without changing the UI.',
+  modeTitle:'Operating mode', soon:'In development', liveNote:'Live Device Mode is not enabled: the app does not try to connect to any device. It will be enabled once Wi-Fi or BLE is chosen and the link is programmed.',
+  payloadTitle:'Proposed data format', copy:'Copy', copied:'Copied', copyFail:'Copy failed — select the text manually',
+  payloadNote:'A proposed data-exchange format, not a protocol implemented today. Values shown come from the running simulation.',
+  layersTitle:'App layers', runTitle:'Run locally',
+  disclaimer:'THILLI is an educational, innovation prototype. Alert levels are not a medical diagnosis or a guarantee of protecting children from heat stress, and all readings shown are simulated.',
+  langBtn:'العربية'
+}};
+
+const HW = {
+  dht11:{ role:{ar:'حساس الحرارة والرطوبة',en:'Temperature & humidity sensor'},
+    desc:{ar:'حساس رقمي يقيس درجة الحرارة والرطوبة النسبية ويرسل القراءة إلى ESP32 عبر خط بيانات واحد.',en:'A digital sensor that measures temperature and relative humidity and sends readings to the ESP32 over a single data line.'},
+    proj:{ar:'المصدر الوحيد للقراءات البيئية في النموذج الحالي؛ عليه يعتمد مستوى التنبيه وحساب مؤشر الحرارة.',en:'The only source of environmental readings in the current prototype; the alert level and heat index depend on it.'},
+    specs:{ar:['نطاق الحرارة النموذجي: 0–50°C (دقة نحو ±2°C)','نطاق الرطوبة النموذجي: 20–90% (دقة نحو ±5%)','قراءة واحدة في الثانية تقريبًا كحد أقصى','قد يحتاج مقاومة سحب 10kΩ على خط البيانات إن لم تكن مدمجة في الوحدة'],
+           en:['Typical temperature range: 0–50°C (about ±2°C)','Typical humidity range: 20–90% (about ±5%)','At most about one reading per second','May need a 10kΩ pull-up on the data line if the module lacks one']}},
+  esp32:{ role:{ar:'المتحكم الرئيسي',en:'Main controller'},
+    desc:{ar:'متحكم دقيق يقرأ الحساس دوريًا ويطبّق منطق التنبيه ويتحكم في المخرجات.',en:'A microcontroller that reads the sensor periodically, applies the alert logic and drives the outputs.'},
+    proj:{ar:'عقل القبعة: يحوّل القراءة إلى مستوى أخضر/أصفر/أحمر، يضبط لون LED، ويشغّل المحرك في الأحمر. يدعم Wi-Fi وBLE للربط مستقبلًا مع هذا التطبيق.',en:'The hat\'s brain: turns readings into green/yellow/red, sets the LED colour and runs the motor at red. Its Wi-Fi and BLE allow linking to this app later.'},
+    specs:{ar:['معالج ثنائي النواة مع Wi-Fi وBluetooth/BLE','منطق أطرافه بجهد 3.3V','يتحكم في LED عبر ثلاثة مخارج وفي المحرك عبر L9110S'],en:['Dual-core with Wi-Fi and Bluetooth/BLE','3.3V logic I/O','Drives the LED via three outputs and the motor via the L9110S']}},
+  led:{ role:{ar:'مؤشر الحالة الضوئي',en:'Visual status indicator'},
+    desc:{ar:'مصباح RGB بأربعة أطراف: ثلاثة ألوان وطرف مشترك.',en:'A four-pin RGB LED: three colour channels plus a common pin.'},
+    proj:{ar:'يعرض الحالة بلون واضح يراه الطفل والمرافق: أخضر، أصفر (أحمر + أخضر)، أو أحمر.',en:'Shows the state in a colour the child and carer can see: green, yellow (red + green) or red.'},
+    specs:{ar:['مقاومة 220Ω لكل لون لتحديد التيار','يجب التحقق من نوعه: مشترك الكاثود أم مشترك الأنود','اللون الأصفر = تشغيل الأحمر والأخضر معًا'],en:['A 220Ω resistor per channel to limit current','Check whether it is common-cathode or common-anode','Yellow = red and green together']}},
+  l9110s:{ role:{ar:'مشغّل المحرك',en:'Motor driver'},
+    desc:{ar:'مشغّل محركات مزدوج القناة يتحكم فيه ESP32 بإشارات منطقية.',en:'A dual-channel motor driver controlled by logic signals from the ESP32.'},
+    proj:{ar:'يمنع سحب تيار المحرك مباشرة من أطراف ESP32، فيحمي المتحكم ويشغّل المحرك بأمان أكبر.',en:'Keeps motor current off the ESP32 pins, protecting the controller and driving the motor more safely.'},
+    specs:{ar:['قناة واحدة تكفي لمحرك الاهتزاز','طرفا إدخال للقناة يحددان التشغيل والإيقاف'],en:['One channel is enough for the vibration motor','Two inputs per channel set on/off']}},
+  motor:{ role:{ar:'التنبيه بالاهتزاز',en:'Haptic alert'},
+    desc:{ar:'محرك اهتزاز قرصي صغير يعطي تنبيهًا محسوسًا دون صوت.',en:'A small coin vibration motor that gives a felt alert without sound.'},
+    proj:{ar:'يعمل في المستوى الأحمر فقط ليلفت انتباه الطفل حتى لو لم يرَ المؤشر الضوئي.',en:'Runs only at the red level to get the child\'s attention even if they cannot see the LED.'},
+    specs:{ar:['يُشغَّل عبر L9110S وليس مباشرة من المتحكم','في التطبيق: يظهر كاهتزاز مرئي للقبعة'],en:['Driven through the L9110S, not directly from the controller','In this app: shown as a visual shake of the hat']}}
+};
+const AUX = ['220Ω Resistors','10kΩ Resistors','Breadboard','Prototype PCB','Jumper Wires'];
+
+const LAYERS = {
+ ar:[['DeviceAdapter','مصدر البيانات: <code>SimulationAdapter</code> (مفعّل) و<code>LiveDeviceAdapter</code> (هيكل فارغ لا يتصل بأي جهاز).'],
+     ['normalizeReading()','يتحقق من صيغة الرسالة المقترحة قبل دخولها للتطبيق.'],
+     ['AlertEngine','دالة نقية تحدد الأخضر/الأصفر/الأحمر من درجة الحرارة والحدود فقط.'],
+     ['HeatIndex','حساب مستقل لمؤشر الحرارة مع التحقق من نطاق صلاحية المعادلة.'],
+     ['Store','الحالة والسجل وأحداث التنبيه وآخر 60 قراءة.'],
+     ['UI / Hat3D','الواجهة ونموذج القبعة يقرآن الحالة فقط ولا يعرفان مصدر البيانات.']],
+ en:[['DeviceAdapter','Data source: <code>SimulationAdapter</code> (active) and <code>LiveDeviceAdapter</code> (an empty shell that never connects).'],
+     ['normalizeReading()','Validates the proposed message format before it enters the app.'],
+     ['AlertEngine','A pure function mapping temperature + thresholds to green/yellow/red.'],
+     ['HeatIndex','Separate heat-index calculation with a validity-range check.'],
+     ['Store','State, alert events and the last 60 readings.'],
+     ['UI / Hat3D','The UI and hat model only read state; they do not know the data source.']]
+};
+const RUN = {
+ ar:['احفظ هذا الملف (thilli.html) على جهازك.','افتحه بمتصفح حديث مثل Chrome أو Edge أو Safari — لا يحتاج خادمًا أو تثبيتًا.','يلزم اتصال بالإنترنت أول مرة لتحميل Three.js والأيقونات والخط من CDN؛ إن تعذّر Three.js يظهر البديل ثنائي الأبعاد تلقائيًا.','لربط ESP32 لاحقًا: نفّذ <code>LiveDeviceAdapter.connect()</code> عبر WebSocket (Wi-Fi) أو Web Bluetooth (BLE)، ومرّر كل رسالة إلى <code>normalizeReading()</code>.'],
+ en:['Save this file (thilli.html) to your computer.','Open it in a modern browser such as Chrome, Edge or Safari — no server or install needed.','An internet connection is needed the first time to load Three.js, icons and the font from CDNs; if Three.js fails, the 2D fallback appears automatically.','To connect the ESP32 later: implement <code>LiveDeviceAdapter.connect()</code> over WebSocket (Wi-Fi) or Web Bluetooth (BLE), and pass each message to <code>normalizeReading()</code>.']
+};
+
+/* =====================================================================
+   3) PURE LOGIC — alert engine and heat index are deliberately separate
+   ===================================================================== */
+const AlertEngine = {
+  evaluate(tempC, th){ if (tempC >= th.redAt) return 'red'; if (tempC >= th.yellowAt) return 'yellow'; return 'green'; },
+  motorFor(level){ return level === 'red'; }
+};
+
+const HeatIndex = {
+  MIN_T_C: 26.7, MIN_RH: 40, MAX_HI_F: 137,
+  /** Rothfusz regression (US NWS). Returns {valid:false, reason} outside its validity range. */
+  compute(tC, rh){
+    if (tC < this.MIN_T_C) return { valid:false, reason:'lowTemp' };
+    if (rh < this.MIN_RH)  return { valid:false, reason:'lowRH' };
+    const T = tC * 9/5 + 32, R = rh;
+    let hi = -42.379 + 2.04901523*T + 10.14333127*R - 0.22475541*T*R - 0.00683783*T*T
+             - 0.05481717*R*R + 0.00122874*T*T*R + 0.00085282*T*R*R - 0.00000199*T*T*R*R;
+    if (R > 85 && T >= 80 && T <= 87) hi += ((R - 85) / 10) * ((87 - T) / 5);
+    if (hi > this.MAX_HI_F) return { valid:false, reason:'high' };
+    return { valid:true, valueC:(hi - 32) * 5/9, valueF:hi };
+  }
+};
+
+/** Validates the proposed exchange format. Throws on bad input. */
+function normalizeReading(p){
+  if (!p || typeof p !== 'object') throw new Error('payload must be an object');
+  const t = Number(p.temperature), h = Number(p.humidity);
+  if (!Number.isFinite(t) || !Number.isFinite(h)) throw new Error('temperature/humidity must be numbers');
+  if (h < 0 || h > 100) throw new Error('humidity out of range');
+  const out = { deviceId:String(p.deviceId || DEVICE_ID), temperature:t, humidity:h, timestamp:p.timestamp || new Date().toISOString() };
+  if (['green','yellow','red'].includes(p.alertLevel)) out.alertLevel = p.alertLevel;   // device-reported (future)
+  if (typeof p.motorActive === 'boolean') out.motorActive = p.motorActive;
+  return out;
+}
+
+/* =====================================================================
+   4) DEVICE ADAPTERS
+   ===================================================================== */
+class SimulationAdapter {
+  constructor(){ this.mode = 'simulation'; this.cond = { ...SIM_DEFAULT }; this.running = false; this.timer = null; this.subs = new Set(); }
+  onReading(fn){ this.subs.add(fn); return () => this.subs.delete(fn); }
+  connect(){
+    if (this.running) return Promise.resolve({ virtual:true });
+    this.running = true; this._emit('tick');
+    this.timer = setInterval(() => this._emit('tick'), SAMPLE_MS);
+    return Promise.resolve({ virtual:true });
+  }
+  disconnect(){ this.running = false; clearInterval(this.timer); this.timer = null; return Promise.resolve(); }
+  setConditions(c){ this.cond = { ...this.cond, ...c }; if (this.running) this._emit('change'); }
+  _emit(kind){
+    const r = normalizeReading({ deviceId:DEVICE_ID, temperature:this.cond.temperature, humidity:this.cond.humidity, timestamp:new Date().toISOString() });
+    r.source = 'simulation'; r.kind = kind;
+    this.subs.forEach(fn => fn(r));
+  }
+}
+/** Placeholder for the real hat. Intentionally does NOT connect to anything yet. */
+class LiveDeviceAdapter {
+  constructor(transport){ this.mode = 'live'; this.transport = transport || null; }
+  onReading(){ return () => {}; }
+  connect(){ return Promise.reject(new Error('LIVE_MODE_NOT_IMPLEMENTED')); }
+  disconnect(){ return Promise.resolve(); }
+}
+
+/* =====================================================================
+   5) STORE
+   ===================================================================== */
+let storageOK = true;
+function loadSettings(){
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) return sanitizeSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(raw) }); }
+  catch(e){ storageOK = false; }
+  return { ...DEFAULT_SETTINGS };
+}
+function sanitizeSettings(s){
+  const o = { ...DEFAULT_SETTINGS, ...s };
+  if (!(o.yellowAt >= 0 && o.redAt <= 50 && o.redAt > o.yellowAt)) { o.yellowAt = DEFAULT_SETTINGS.yellowAt; o.redAt = DEFAULT_SETTINGS.redAt; }
+  if (!['ar','en'].includes(o.lang)) o.lang = 'ar';
+  o.deviceName = String(o.deviceName || DEFAULT_SETTINGS.deviceName).slice(0,40);
+  o.vibration = !!o.vibration; o.sound = !!o.sound;
+  return o;
+}
+function saveSettings(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.settings)); storageOK = true; }
+  catch(e){ storageOK = false; }
+}
+
+const state = {
+  settings: loadSettings(),
+  powered: true,
+  cond: { ...SIM_DEFAULT },
+  reading: null,          // last reading enriched with level/hi
+  level: null,            // null = no reading since power-on
+  history: [],            // recorded readings
+  events: [],             // alert transitions
+  lastRecordAt: 0,
+  enteredAt: { yellow:null, red:null },
+  partsShown: false
+};
+
+const adapter = new SimulationAdapter();
+adapter.onReading(handleReading);
+
+function handleReading(r){
+  const level = AlertEngine.evaluate(r.temperature, state.settings);
+  const hi = HeatIndex.compute(r.temperature, r.humidity);
+  const prev = state.level;
+  state.reading = { ...r, level, hi, motorActive: AlertEngine.motorFor(level) };
+  state.level = level;
+  if (prev === null) pushEvent({ type:'start', from:null, to:level, r });
+  else if (prev !== level) pushEvent({ type:'change', from:prev, to:level, r });
+  if (prev !== level && (level === 'yellow' || level === 'red')) { state.enteredAt[level] = new Date(r.timestamp); Sound.alert(level); }
+  const now = Date.now();
+  if (r.kind === 'tick' || prev !== level || now - state.lastRecordAt >= MIN_RECORD_GAP) {
+    state.history.push({ time:new Date(r.timestamp), temperature:r.temperature, humidity:r.humidity, hi, level });
+    if (state.history.length > HISTORY_MAX) state.history.shift();
+    state.lastRecordAt = now;
+  }
+  scheduleRender();
+}
+function pushEvent({ type, from, to, r }){
+  state.events.push({ type, from, to, time: r ? new Date(r.timestamp) : new Date(), temperature: r ? r.temperature : null, humidity: r ? r.humidity : null });
+  if (state.events.length > EVENTS_MAX) state.events.shift();
+}
+
+const App = {
+  setConditions(c){
+    state.cond = { ...state.cond, ...c };
+    adapter.setConditions(state.cond);
+    scheduleRender();
+  },
+  setPower(on){
+    if (on === state.powered) return;
+    state.powered = on;
+    if (on) { state.level = null; adapter.connect(); }
+    else { adapter.disconnect(); pushEvent({ type:'off', from:state.level, to:null, r:null }); }
+    scheduleRender();
+  },
+  resetSimulation(){
+    state.cond = { ...SIM_DEFAULT };
+    state.history = []; state.events = []; state.enteredAt = { yellow:null, red:null }; state.lastRecordAt = 0;
+    adapter.cond = { ...SIM_DEFAULT };
+    if (state.powered) { state.level = null; adapter.setConditions(state.cond); }
+    else { state.reading = null; state.level = null; }
+    syncControls(); scheduleRender();
+  },
+  updateSettings(patch, { silent } = {}){
+    state.settings = sanitizeSettings({ ...state.settings, ...patch });
+    saveSettings();
+    if (state.powered) adapter.setConditions({});   // re-evaluate with new thresholds
+    if (!silent) toast(t('saved'));
+    scheduleRender();
+  }
+};
+
+/* =====================================================================
+   6) SOUND (Web Audio, optional)
+   ===================================================================== */
+const Sound = {
+  ctx:null,
+  ensure(){ try { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if (this.ctx.state === 'suspended') this.ctx.resume(); } catch(e){ this.ctx = null; } return this.ctx; },
+  beep(freq, start, dur){
+    const c = this.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine'; o.frequency.value = freq; o.connect(g); g.connect(c.destination);
+    const t0 = c.currentTime + start;
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.18, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.start(t0); o.stop(t0 + dur + 0.02);
+  },
+  alert(level){
+    if (!state.settings.sound || !this.ensure()) return;
+    try { if (level === 'yellow') this.beep(660, 0, .22); else { this.beep(880, 0, .16); this.beep(880, .22, .16); this.beep(880, .44, .16); } } catch(e){}
+  }
+};
+
+/* =====================================================================
+   7) HELPERS
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const lang = () => state.settings.lang;
+function t(key, vars){
+  let s = (I18N[lang()] && I18N[lang()][key]) ?? I18N.ar[key] ?? key;
+  if (vars) for (const k in vars) s = s.replaceAll('{' + k + '}', vars[k]);
+  return s;
+}
+const fmt1 = v => (Math.round(v * 10) / 10).toFixed(1);
+const locale = () => lang() === 'ar' ? 'ar-SA-u-nu-latn-ca-gregory' : 'en-GB';
+const fmtTime = d => d ? d.toLocaleTimeString(locale(), { hour:'2-digit', minute:'2-digit', second:'2-digit' }) : '—';
+let toastTimer;
+function toast(msg){ const el = $('toast'); el.textContent = msg; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 1600); }
+function displayLevel(){ return state.powered && state.reading ? state.reading.level : 'off'; }
+function icons(){ try { window.lucide && lucide.createIcons(); } catch(e){} }
+
+/* =====================================================================
+   8) HAT VIEWER — Three.js with a 2D SVG fallback
+   ===================================================================== */
+const PART_COLORS = { esp32:'#1F2937', dht11:'#2F80ED', led:'#22C55E', motor:'#9CA3AF', power:'#7C8DB5' };
+
+const Hat3D = (() => {
+  let ok = false, renderer, scene, camera, hat, crownMat, visorMat, bandMat, ledMat, ledLight, glow, partsGroup, anchors = {}, labels = {};
+  let stage, rotY = -0.65, rotX = 0.32, dist = 5.4, lastInteract = 0, vis = { level:'green', powered:true, vibrate:false, parts:false };
+  const pointers = new Map(); let pinchStart = 0, pinchDist = 0;
+  const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function glowTexture(){
+    const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+    const grd = g.createRadialGradient(64,64,0,64,64,64); grd.addColorStop(0,'rgba(255,255,255,1)'); grd.addColorStop(.25,'rgba(255,255,255,.55)'); grd.addColorStop(1,'rgba(255,255,255,0)');
+    g.fillStyle = grd; g.fillRect(0,0,128,128); return new THREE.CanvasTexture(c);
+  }
+  function shadowTexture(){
+    const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+    const grd = g.createRadialGradient(64,64,0,64,64,64); grd.addColorStop(0,'rgba(42,18,96,.28)'); grd.addColorStop(1,'rgba(42,18,96,0)');
+    g.fillStyle = grd; g.fillRect(0,0,128,128); return new THREE.CanvasTexture(c);
+  }
+  let bandCanvas, bandTex;
+  function drawBand(){
+    const g = bandCanvas.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0,0,bandCanvas.width,bandCanvas.height);
+    g.fillStyle = '#6234D8'; g.font = '600 46px "IBM Plex Sans Arabic", sans-serif'; g.textBaseline = 'middle'; g.textAlign = 'center';
+    const n = 4; for (let i = 0; i < n; i++){ g.fillText('THILLI  •  ظِلّي', (i + .5) * bandCanvas.width / n, bandCanvas.height / 2 + 2); }
+    if (bandTex) bandTex.needsUpdate = true;
+  }
+  function std(color, extra){ return new THREE.MeshStandardMaterial(Object.assign({ color, roughness:.55, metalness:.05 }, extra || {})); }
+
+  function build(){
+    hat = new THREE.Group(); scene.add(hat);
+    crownMat = std(0x6A3DE0, { transparent:true, side:THREE.DoubleSide });
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2), crownMat);
+    crown.scale.set(1, .85, 1); hat.add(crown);
+
+    bandCanvas = document.createElement('canvas'); bandCanvas.width = 2048; bandCanvas.height = 72; drawBand();
+    bandTex = new THREE.CanvasTexture(bandCanvas);
+    bandMat = new THREE.MeshStandardMaterial({ map:bandTex, roughness:.7, transparent:true, side:THREE.DoubleSide });
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(1.014, 1.014, .15, 96, 1, true), bandMat);
+    band.position.y = .075; hat.add(band);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawBand);
+
+    visorMat = std(0x8A5CF5, { transparent:true });
+    const visor = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, .05, 64, 1, false, -Math.PI / 2, Math.PI), visorMat);
+    visor.scale.set(1, 1, 1.55); visor.position.y = .02; visor.rotation.x = .14; hat.add(visor);
+
+    const seamMat = new THREE.MeshBasicMaterial({ color:0xFFFFFF, transparent:true, opacity:.55 });
+    for (let k = 0; k < 6; k++){
+      const th = k * Math.PI / 3 + Math.PI / 6, pts = [];
+      for (let i = 0; i <= 24; i++){ const e = .17 + (Math.PI / 2 - .17) * i / 24; pts.push(new THREE.Vector3(Math.cos(e) * Math.sin(th) * 1.004, .85 * Math.sin(e) * 1.004, Math.cos(e) * Math.cos(th) * 1.004)); }
+      hat.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, .006, 6, false), seamMat));
+    }
+    const btn = new THREE.Mesh(new THREE.SphereGeometry(.075, 24, 16), std(0xFFFFFF)); btn.position.y = .85; hat.add(btn);
+
+    // RGB LED pod on the front of the crown
+    const e = .62, p = new THREE.Vector3(0, .85 * Math.sin(e), Math.cos(e));
+    const n = new THREE.Vector3(0, p.y / (.85 * .85), p.z).normalize();
+    const pod = new THREE.Mesh(new THREE.CylinderGeometry(.13, .14, .045, 32), std(0xFFFFFF));
+    pod.position.copy(p).addScaledVector(n, .012); pod.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), n); hat.add(pod);
+    ledMat = new THREE.MeshStandardMaterial({ color:0x22C55E, emissive:0x22C55E, emissiveIntensity:1, roughness:.2 });
+    const led = new THREE.Mesh(new THREE.SphereGeometry(.075, 24, 16), ledMat);
+    led.position.copy(p).addScaledVector(n, .05); hat.add(led);
+    ledLight = new THREE.PointLight(0x22C55E, 1.1, 2.4); ledLight.position.copy(p).addScaledVector(n, .35); hat.add(ledLight);
+    glow = new THREE.Sprite(new THREE.SpriteMaterial({ map:glowTexture(), color:0x22C55E, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true }));
+    glow.position.copy(p).addScaledVector(n, .08); glow.scale.set(.6, .6, 1); hat.add(glow);
+    anchors.led = led;
+
+    // internal parts (illustrative positions)
+    partsGroup = new THREE.Group(); partsGroup.visible = false; hat.add(partsGroup);
+    const esp = new THREE.Group();
+    esp.add(new THREE.Mesh(new THREE.BoxGeometry(.46, .03, .26), std(0x1F2937)));
+    const shield = new THREE.Mesh(new THREE.BoxGeometry(.2, .03, .16), std(0xC0C6D2, { metalness:.6, roughness:.3 })); shield.position.set(.06, .03, 0); esp.add(shield);
+    esp.position.set(0, .52, -.22); esp.rotation.x = -.3; partsGroup.add(esp); anchors.esp32 = esp;
+    const dht = new THREE.Mesh(new THREE.BoxGeometry(.06, .17, .13), std(0x2F80ED)); dht.position.set(.74, .32, .12); partsGroup.add(dht); anchors.dht11 = dht;
+    const motor = new THREE.Mesh(new THREE.CylinderGeometry(.09, .09, .035, 32), std(0xB8BCC8, { metalness:.7, roughness:.3 }));
+    motor.position.set(-.74, .32, .12); motor.rotation.z = Math.PI / 2; partsGroup.add(motor); anchors.motor = motor;
+    const bat = new THREE.Mesh(new THREE.BoxGeometry(.34, .05, .2), std(0x7C8DB5, { metalness:.4 })); bat.position.set(0, .24, -.62); partsGroup.add(bat); anchors.power = bat;
+    const wireMat = new THREE.LineBasicMaterial({ color:0xF59E0B });
+    const espPos = new THREE.Vector3(0, .52, -.22);
+    [dht.position, motor.position, bat.position, led.position].forEach(target => {
+      const mid = espPos.clone().add(target).multiplyScalar(.5); mid.y += .08;
+      const curve = new THREE.QuadraticBezierCurve3(espPos, mid, target);
+      partsGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(20)), wireMat));
+    });
+
+    const shadow = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.4), new THREE.MeshBasicMaterial({ map:shadowTexture(), transparent:true, depthWrite:false }));
+    shadow.rotation.x = -Math.PI / 2; shadow.position.y = -.32; scene.add(shadow);
+  }
+
+  function buildLabels(){
+    const box = $('hatLabels'); box.innerHTML = '';
+    ['esp32','dht11','led','motor','power'].forEach(k => {
+      const el = document.createElement('span'); el.className = 'part-label';
+      el.innerHTML = `<i style="background:${PART_COLORS[k]}"></i><span data-i18n="p_${k}">${t('p_' + k)}</span>`;
+      box.appendChild(el); labels[k] = el;
+    });
+  }
+
+  function init(el){
+    stage = el;
+    if (!window.THREE) return false;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+      if (!renderer.getContext()) return false;
+    } catch(e){ return false; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    stage.insertBefore(renderer.domElement, stage.firstChild);
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(34, 1, .1, 100);
+    scene.add(new THREE.HemisphereLight(0xFFFFFF, 0xCBBEFF, .9));
+    const d1 = new THREE.DirectionalLight(0xFFFFFF, .75); d1.position.set(3, 5, 4); scene.add(d1);
+    const d2 = new THREE.DirectionalLight(0xB9A6FF, .35); d2.position.set(-4, 2, -3); scene.add(d2);
+    build(); buildLabels(); bindInput();
+    const ro = new ResizeObserver(resize); ro.observe(stage); resize();
+    ok = true; requestAnimationFrame(loop); return true;
+  }
+  function resize(){
+    if (!renderer) return; const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  function bindInput(){
+    const c = renderer.domElement;
+    c.addEventListener('pointerdown', e => { pointers.set(e.pointerId, { x:e.clientX, y:e.clientY }); c.setPointerCapture(e.pointerId); lastInteract = performance.now();
+      if (pointers.size === 2){ const [a,b] = [...pointers.values()]; pinchStart = Math.hypot(a.x-b.x, a.y-b.y); pinchDist = dist; } });
+    c.addEventListener('pointermove', e => {
+      if (!pointers.has(e.pointerId)) return; const prev = pointers.get(e.pointerId); pointers.set(e.pointerId, { x:e.clientX, y:e.clientY }); lastInteract = performance.now();
+      if (pointers.size === 1){ rotY -= (e.clientX - prev.x) * .009; rotX = Math.max(-.25, Math.min(1.15, rotX + (e.clientY - prev.y) * .007)); }
+      else if (pointers.size === 2 && pinchStart){ const [a,b] = [...pointers.values()]; zoomTo(pinchDist * pinchStart / Math.max(30, Math.hypot(a.x-b.x, a.y-b.y))); }
+    });
+    const up = e => { pointers.delete(e.pointerId); if (pointers.size < 2) pinchStart = 0; };
+    c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
+    c.addEventListener('wheel', e => { e.preventDefault(); lastInteract = performance.now(); zoomTo(dist + e.deltaY * .004); }, { passive:false });
+  }
+  function zoomTo(d){ dist = Math.max(3.2, Math.min(8.5, d)); }
+  function loop(now){
+    requestAnimationFrame(loop);
+    if (!reduced && now - lastInteract > 4000 && pointers.size === 0) rotY += .0035;
+    camera.position.set(dist * Math.sin(rotY) * Math.cos(rotX), dist * Math.sin(rotX) + .3, dist * Math.cos(rotY) * Math.cos(rotX));
+    camera.lookAt(0, .3, 0);
+    // vibration: buzz in bursts (600 ms on / 400 ms off)
+    if (vis.vibrate && (now % 1000) < 600){ const a = reduced ? .006 : .022; hat.position.set((Math.random() - .5) * a, (Math.random() - .5) * a * .5, (Math.random() - .5) * a); hat.rotation.z = (Math.random() - .5) * a * .8; }
+    else { hat.position.set(0,0,0); hat.rotation.z = 0; }
+    if (vis.powered && vis.level === 'red'){ const s = .6 + .18 * Math.sin(now / 160); glow.scale.set(s, s, 1); } else glow.scale.set(.6, .6, 1);
+    renderer.render(scene, camera);
+    if (vis.parts) placeLabels();
+  }
+  const tmp = () => new THREE.Vector3();
+  function placeLabels(){
+    const w = stage.clientWidth, h = stage.clientHeight;
+    for (const k in labels){
+      const v = anchors[k].getWorldPosition(tmp()).project(camera);
+      const x = (v.x + 1) / 2 * w, y = (1 - v.y) / 2 * h - 22;
+      labels[k].style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+    }
+  }
+  function update(next){
+    vis = { ...vis, ...next }; if (!ok) return;
+    const col = new THREE.Color(LED_HEX[vis.powered ? vis.level : 'off']);
+    ledMat.color.copy(col); ledMat.emissive.copy(col); ledMat.emissiveIntensity = vis.powered ? 1.1 : 0;
+    ledLight.color.copy(col); ledLight.intensity = vis.powered ? 1.1 : 0;
+    glow.material.color.copy(col); glow.visible = vis.powered;
+    partsGroup.visible = vis.parts;
+    const op = vis.parts ? .2 : 1;
+    [crownMat, visorMat, bandMat].forEach(m => { m.opacity = vis.parts ? (m === crownMat ? op : .35) : 1; m.depthWrite = !vis.parts; });
+    stage.classList.toggle('parts-on', vis.parts);
+  }
+  function relabel(){ for (const k in labels) labels[k].querySelector('span').textContent = t('p_' + k); }
+  return {
+    init, update, relabel,
+    zoomIn(){ zoomTo(dist - .6); lastInteract = performance.now(); }, zoomOut(){ zoomTo(dist + .6); lastInteract = performance.now(); },
+    resetView(){ rotY = -.65; rotX = .32; dist = 5.4; lastInteract = 0; },
+    get ok(){ return ok; }
+  };
+})();
+
+const Hat2D = (() => {
+  let wrap, svg, dragX = null, angle = 0;
+  function init(stage){
+    wrap = document.createElement('div'); wrap.className = 'svg-hat';
+    wrap.innerHTML = `
+<svg viewBox="0 0 420 300" role="img" aria-label="THILLI hat (2D)">
+  <ellipse cx="210" cy="262" rx="160" ry="16" fill="rgba(42,18,96,.12)"/>
+  <g id="h2dBody">
+    <path d="M78 214 C78 120 138 62 210 62 C282 62 342 120 342 214 Z" fill="#6A3DE0"/>
+    <path d="M210 62 C176 90 160 150 160 214 M210 62 C244 90 260 150 260 214" stroke="#fff" stroke-opacity=".5" stroke-width="2" fill="none"/>
+    <rect x="76" y="200" width="268" height="20" rx="6" fill="#fff"/>
+    <text x="210" y="215" text-anchor="middle" font-size="13" font-weight="600" fill="#6234D8" style="font-family:inherit">THILLI • ظِلّي</text>
+    <path d="M300 214 L404 222 C406 232 398 238 388 238 L292 236 Z" fill="#8A5CF5"/>
+    <circle cx="210" cy="58" r="8" fill="#fff"/>
+    <g id="h2dParts" style="display:none">
+      <rect x="168" y="118" width="84" height="40" rx="5" fill="#1F2937"/><rect x="190" y="126" width="34" height="24" rx="3" fill="#C0C6D2"/>
+      <rect x="306" y="150" width="20" height="34" rx="3" fill="#2F80ED"/>
+      <circle cx="104" cy="168" r="14" fill="#B8BCC8" stroke="#8A8F9C" stroke-width="2"/>
+      <rect x="170" y="172" width="80" height="18" rx="4" fill="#7C8DB5"/>
+      <g font-size="11" font-weight="600" fill="#1C1530" style="font-family:inherit" text-anchor="middle">
+        <text x="210" y="112">ESP32</text><text x="316" y="144">DHT11</text><text x="104" y="146" data-p="motor"></text><text x="210" y="204" data-p="power"></text>
+      </g>
+    </g>
+    <circle cx="276" cy="128" r="16" fill="#fff"/>
+    <circle id="h2dLed" cx="276" cy="128" r="10" fill="#22C55E"/>
+    <circle id="h2dGlow" cx="276" cy="128" r="26" fill="#22C55E" opacity=".25"/>
+  </g>
+</svg>`;
+    stage.insertBefore(wrap, stage.firstChild);
+    svg = wrap.querySelector('svg');
+    // simple interactive "turn": drag horizontally to flip the hat's facing
+    stage.addEventListener('pointerdown', e => { dragX = e.clientX; });
+    window.addEventListener('pointerup', () => { dragX = null; });
+    stage.addEventListener('pointermove', e => { if (dragX === null) return; angle = Math.max(-25, Math.min(25, angle + (e.clientX - dragX) * .3)); dragX = e.clientX; apply(); });
+    apply(); return true;
+  }
+  let scale = 1;
+  function apply(){ $('h2dBody').setAttribute('transform', `translate(210 160) scale(${Math.cos(angle * Math.PI / 180) * scale} ${scale}) translate(-210 -160)`); }
+  function update(v){
+    if (!svg) return;
+    const col = LED_HEX[v.powered ? v.level : 'off'];
+    $('h2dLed').setAttribute('fill', col); $('h2dGlow').setAttribute('fill', col); $('h2dGlow').setAttribute('opacity', v.powered ? .3 : 0);
+    svg.classList.toggle('shake', !!v.vibrate);
+    $('h2dParts').style.display = v.parts ? '' : 'none';
+    svg.querySelector('[data-p=motor]').textContent = t('p_motor'); svg.querySelector('[data-p=power]').textContent = t('p_power');
+  }
+  return { init, update, zoomIn(){ scale = Math.min(1.3, scale + .1); apply(); }, zoomOut(){ scale = Math.max(.7, scale - .1); apply(); }, resetView(){ scale = 1; angle = 0; apply(); } };
+})();
+
+let Viewer = null;
+
+/* =====================================================================
+   9) CHARTS (lightweight SVG)
+   ===================================================================== */
+function drawChart(svg, rows, o){
+  const w = svg.clientWidth || svg.parentNode.clientWidth; if (!w) return;
+  const h = 230, pad = { l:38, r:16, t:14, b:28 }, iw = w - pad.l - pad.r, ih = h - pad.t - pad.b;
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  const y = v => pad.t + (1 - (v - o.min) / (o.max - o.min)) * ih;
+  const cap = HISTORY_MAX, n = rows.length;
+  const x = i => pad.l + (cap === 1 ? iw : (i + cap - n) / (cap - 1) * iw);
+  let s = `<defs><linearGradient id="g_${o.id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${o.color}" stop-opacity=".22"/><stop offset="1" stop-color="${o.color}" stop-opacity="0"/></linearGradient></defs>`;
+  (o.bands || []).forEach(b => { const y1 = y(Math.min(b.to, o.max)), y2 = y(Math.max(b.from, o.min)); if (y2 > y1) s += `<rect x="${pad.l}" y="${y1}" width="${iw}" height="${y2 - y1}" fill="${b.fill}" ${b.dash ? 'stroke="rgba(29,111,216,.4)" stroke-dasharray="4 4"' : ''}/>`; });
+  o.ticks.forEach(v => { s += `<line x1="${pad.l}" x2="${w - pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="#EEEAF6"/><text x="${pad.l - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`; });
+  (o.lines || []).forEach(l => { s += `<line x1="${pad.l}" x2="${w - pad.r}" y1="${y(l.v)}" y2="${y(l.v)}" stroke="${l.color}" stroke-width="1.5" stroke-dasharray="5 4"/><text x="${pad.l + 6}" y="${y(l.v) - 5}" text-anchor="start" style="fill:${l.color};font-weight:600">${l.label}</text>`; });
+  if (!n){ s += `<text x="${pad.l + iw / 2}" y="${pad.t + ih / 2}" text-anchor="middle" style="font-size:13px">${t('noData')}</text>`; svg.innerHTML = s; return; }
+  const pts = rows.map((r, i) => [x(i), y(Math.max(o.min, Math.min(o.max, r[o.key])))]);
+  const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  s += `<path d="${line} L${pts[n - 1][0].toFixed(1)} ${pad.t + ih} L${pts[0][0].toFixed(1)} ${pad.t + ih} Z" fill="url(#g_${o.id})"/>`;
+  s += `<path d="${line}" fill="none" stroke="${o.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const last = pts[n - 1], lv = rows[n - 1][o.key];
+  s += `<circle cx="${last[0]}" cy="${last[1]}" r="5" fill="#fff" stroke="${o.color}" stroke-width="3"/>`;
+  s += `<text x="${last[0] - 8}" y="${last[1] - 10}" text-anchor="end" style="fill:${o.color};font-weight:700;font-size:12px">${o.fmt(lv)}</text>`;
+  if (last[0] - pts[0][0] > 110) s += `<text x="${pts[0][0]}" y="${h - 8}" text-anchor="start">${fmtTime(rows[0].time)}</text>`;
+  if (n >= 1) s += `<text x="${last[0]}" y="${h - 8}" text-anchor="end">${fmtTime(rows[n - 1].time)}</text>`;
+  svg.innerHTML = s;
+}
+
+/* =====================================================================
+   10) RENDER
+   ===================================================================== */
+let renderQueued = false;
+function scheduleRender(){ if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
+
+function levelPill(l){ return `<span class="pill ${l}">${t('s_' + l)}</span>`; }
+
+function render(){
+  const S = state.settings, R = state.reading, lvl = displayLevel(), on = state.powered;
+  const dirLR = document.documentElement.dir === 'rtl' ? 'left' : 'right';
+
+  // header
+  const pb = $('powerBtn'); pb.classList.toggle('is-off', !on); $('powerBtnTxt').textContent = on ? t('turnOff') : t('turnOn');
+  $('brandLed').setAttribute('fill', LED_HEX[lvl]);
+
+  // alert hero
+  $('alertHero').dataset.level = lvl;
+  $('heroLevel').textContent = t('lv_' + lvl);
+  $('heroMsg').textContent = t('msg_' + lvl);
+  $('chipLedTxt').textContent = t('ledIs', { c: t('s_' + lvl) });
+  const motorOn = on && R && R.motorActive;
+  $('chipMotorTxt').textContent = t('motorIs', { s: motorOn ? (S.vibration ? t('motorOn') : t('motorOnNoVis')) : t('motorOff') });
+  $('chipMotor').classList.toggle('on', !!(motorOn && S.vibration));
+
+  // status
+  $('stName').textContent = S.deviceName;
+  $('stPower').innerHTML = on ? `<span class="pill green">${t('powerOn')}</span>` : `<span class="pill off">${t('powerOff')}</span>`;
+  $('stAlert').innerHTML = levelPill(lvl);
+  $('stUpdated').textContent = R ? fmtTime(new Date(R.timestamp)) : '—';
+  $('stConn').innerHTML = on ? `<span class="pill brand">${t('connVirtual')}</span><span class="conn-note">${t('connVirtualNote')}</span>` : `<span class="pill off">${t('connOff')}</span>`;
+
+  // lab
+  $('outTemp').textContent = fmt1(state.cond.temperature) + '°C';
+  $('outHum').textContent = Math.round(state.cond.humidity) + '%';
+  paintRange($('slTemp'), 0, 50, dirLR); paintRange($('slHum'), 0, 100, dirLR);
+  document.querySelectorAll('.scen').forEach(b => { const sc = SCENARIOS[b.dataset.scen]; b.classList.toggle('active', sc.temperature === state.cond.temperature && sc.humidity === state.cond.humidity); });
+  $('thNote').innerHTML = t('thNote', { y: `<span class="num">${S.yellowAt}°C</span>`, r: `<span class="num">${S.redAt}°C</span>` });
+
+  // sensors
+  $('sensorGrid').classList.toggle('dimmed', !on);
+  const temp = R ? R.temperature : null, hum = R ? R.humidity : null;
+  $('valTemp').textContent = temp === null ? '—' : fmt1(temp);
+  $('trackTemp').style.background = thresholdGradient(dirLR);
+  $('markTemp').style.insetInlineStart = (temp === null ? 0 : temp / 50 * 100) + '%';
+  $('footTemp').innerHTML = R ? t('tempFoot', { l: levelPill(R.level) }) : '';
+  $('valHum').textContent = hum === null ? '—' : Math.round(hum);
+  $('fillHum').style.width = (hum === null ? 0 : hum) + '%';
+  $('markHum').style.insetInlineStart = (hum === null ? 0 : hum) + '%';
+  const band = $('bandHum'); band.style.insetInlineStart = DHT11_RANGE.hMin + '%'; band.style.width = (DHT11_RANGE.hMax - DHT11_RANGE.hMin) + '%';
+  const humOut = hum !== null && (hum < DHT11_RANGE.hMin || hum > DHT11_RANGE.hMax);
+  $('footHum').textContent = hum === null ? '' : (humOut ? t('humOut') : t('humFoot'));
+  $('footHum').classList.toggle('warn', humOut);
+  if (R && R.hi.valid){ $('hiValWrap').hidden = false; $('valHi').textContent = fmt1(R.hi.valueC); $('hiMsg').hidden = true; }
+  else if (R){ $('hiValWrap').hidden = true; $('hiMsg').hidden = false; $('hiMsg').textContent = t('hi_' + R.hi.reason); }
+  else { $('hiValWrap').hidden = false; $('valHi').textContent = '—'; $('hiMsg').hidden = true; }
+
+  // hat
+  const vibrate = !!(motorOn && S.vibration);
+  Viewer && Viewer.update({ level: R ? R.level : 'green', powered: on && !!R, vibrate, parts: state.partsShown });
+  $('partsBtnTxt').textContent = state.partsShown ? t('hideParts') : t('showParts');
+  $('hatTitle').textContent = Hat3D.ok ? t('hat3d') : t('hat2d');
+  $('hatHint').innerHTML = `<i data-lucide="mouse-pointer-2"></i>` + (Hat3D.ok ? t('hint3d') : t('hint2d')) + (state.partsShown ? ' — ' + t('partsNote') : '');
+  const lg = $('partsLegend'); lg.classList.toggle('show', state.partsShown);
+  lg.innerHTML = Object.keys(PART_COLORS).map(k => `<span><i style="background:${PART_COLORS[k]}"></i>${t('p_' + k)}</span>`).join('');
+
+  renderMonitoring(); renderSettingsUI(); renderApi();
+  icons();
+}
+
+function paintRange(el, min, max, dirLR){
+  const p = (el.value - min) / (max - min) * 100;
+  el.style.background = `linear-gradient(to ${dirLR}, var(--brand) ${p}%, var(--brand-100) ${p}%)`;
+}
+function thresholdGradient(dirLR){
+  const y = state.settings.yellowAt / 50 * 100, r = state.settings.redAt / 50 * 100;
+  return `linear-gradient(to ${dirLR}, #4ADE80 0%, #4ADE80 ${y}%, #FDE047 ${y}%, #FDE047 ${r}%, #F87171 ${r}%, #F87171 100%)`;
+}
+
+function renderMonitoring(){
+  const lvl = displayLevel();
+  $('msLevel').innerHTML = levelPill(lvl);
+  $('msCount').textContent = state.history.length;
+  $('msYellow').innerHTML = state.enteredAt.yellow ? `<span class="num">${fmtTime(state.enteredAt.yellow)}</span>` : `<span class="sub">${t('never')}</span>`;
+  $('msRed').innerHTML = state.enteredAt.red ? `<span class="num">${fmtTime(state.enteredAt.red)}</span>` : `<span class="sub">${t('never')}</span>`;
+  if (location.hash === '#monitoring'){
+    const S = state.settings;
+    drawChart($('chartTemp'), state.history, { id:'t', key:'temperature', min:0, max:50, ticks:[0,10,20,30,40,50], color:'#6234D8', fmt:v => fmt1(v) + '°C',
+      bands:[{ from:S.yellowAt, to:S.redAt, fill:'rgba(250,204,21,.16)' }, { from:S.redAt, to:50, fill:'rgba(239,68,68,.10)' }],
+      lines:[{ v:S.yellowAt, color:'#B88A00', label:S.yellowAt + '°C' }, { v:S.redAt, color:'#DC2626', label:S.redAt + '°C' }] });
+    drawChart($('chartHum'), state.history, { id:'h', key:'humidity', min:0, max:100, ticks:[0,20,40,60,80,100], color:'#1D6FD8', fmt:v => Math.round(v) + '%',
+      bands:[{ from:DHT11_RANGE.hMin, to:DHT11_RANGE.hMax, fill:'rgba(29,111,216,.05)', dash:true }] });
+  }
+  const ev = state.events.slice().reverse();
+  $('eventsList').innerHTML = ev.length ? ev.map(e => {
+    const cls = e.type === 'off' ? '' : e.to;
+    const ic = e.type === 'off' ? 'power' : e.type === 'start' ? 'play' : (e.to === 'red' ? 'flame' : e.to === 'yellow' ? 'triangle-alert' : 'circle-check');
+    const title = e.type === 'off' ? t('ev_off') : e.type === 'start' ? t('ev_start', { to:levelPill(e.to) }) : t('ev_change', { from:levelPill(e.from), to:levelPill(e.to) });
+    const sub = e.temperature !== null ? `<small>${t('ev_at', { t:`<span class="num">${fmt1(e.temperature)}°C</span>`, h:`<span class="num">${Math.round(e.humidity)}%</span>` })}</small>` : '';
+    return `<li><span class="ev-ic ${cls}"><i data-lucide="${ic}"></i></span><div class="ev-body">${title}${sub}</div><span class="ev-time num">${fmtTime(e.time)}</span></li>`;
+  }).join('') : `<li class="empty">${t('emptyEvents')}</li>`;
+  const rows = state.history.slice(-TABLE_ROWS).reverse();
+  $('readingsBody').innerHTML = rows.length ? rows.map(r => `<tr><td class="num">${fmtTime(r.time)}</td><td class="num">${fmt1(r.temperature)}°C</td><td class="num">${Math.round(r.humidity)}%</td><td class="num">${r.hi.valid ? fmt1(r.hi.valueC) + '°C' : '—'}</td><td>${levelPill(r.level)}</td></tr>`).join('')
+    : `<tr><td colspan="5" class="empty">${t('emptyReadings')}</td></tr>`;
+}
+
+function renderSettingsUI(){
+  const S = state.settings, dirLR = document.documentElement.dir === 'rtl' ? 'left' : 'right';
+  if (document.activeElement !== $('inYellow')) $('inYellow').value = S.yellowAt;
+  if (document.activeElement !== $('inRed')) $('inRed').value = S.redAt;
+  if (document.activeElement !== $('inName')) $('inName').value = S.deviceName;
+  $('swVib').checked = S.vibration; $('swSound').checked = S.sound; $('selLang').value = S.lang;
+  $('thPreview').style.background = thresholdGradient(dirLR);
+  $('storageNote').textContent = storageOK ? t('storageOk') : t('storageNA');
+}
+
+let hwSelected = 'esp32';
+function renderHardware(){
+  const L = lang();
+  document.querySelectorAll('[data-hwrole]').forEach(el => el.textContent = HW[el.dataset.hwrole].role[L]);
+  document.querySelectorAll('.node').forEach(n => n.classList.toggle('active', n.dataset.hw === hwSelected));
+  const c = HW[hwSelected], names = { dht11:'DHT11', esp32:'ESP32 Development Board', led:'RGB LED', l9110s:'L9110S Dual Motor Driver', motor:'Coin Vibration Motor' };
+  $('hwDetail').innerHTML = `<h3>${names[hwSelected]}</h3><div class="role">${c.role[L]} · <span class="pill green">${t('st_available')}</span></div><p>${c.desc[L]}</p><div class="in-proj"><b>${t('inProject')}</b>${c.proj[L]}</div><ul>${c.specs[L].map(s => `<li>${s}</li>`).join('')}</ul>`;
+  $('auxList').innerHTML = AUX.map(a => `<span>${a}</span>`).join('');
+}
+
+function currentPayload(){
+  const R = state.reading;
+  return {
+    deviceId: DEVICE_ID,
+    temperature: R ? Number(fmt1(R.temperature)) : null,
+    humidity: R ? Math.round(R.humidity) : null,
+    alertLevel: R ? R.level : null,
+    motorActive: R ? (state.powered && R.motorActive) : false,
+    timestamp: R ? R.timestamp : null
+  };
+}
+function renderApi(){
+  if (location.hash !== '#api') return;
+  const json = JSON.stringify(currentPayload(), null, 2)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/"(\w+)":/g, '<span style="color:#B9A3FF">"$1"</span>:')
+    .replace(/: "([^"]*)"/g, ': <span style="color:#9FE3B3">"$1"</span>');
+  $('jsonPreview').innerHTML = json;
+  const L = lang();
+  $('layersList').innerHTML = LAYERS[L].map((l, i) => `<li><span class="n">${i + 1}</span><div><code>${l[0]}</code><small>${l[1]}</small></div></li>`).join('');
+  $('runSteps').innerHTML = RUN[L].map(s => `<li>${s}</li>`).join('');
+}
+
+function applyI18n(){
+  const L = lang();
+  document.documentElement.lang = L; document.documentElement.dir = L === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  $('langBtnTxt').textContent = t('langBtn');
+  Hat3D.relabel && Hat3D.relabel();
+  renderHardware(); scheduleRender();
+}
+
+/* =====================================================================
+   11) ROUTING + EVENTS
+   ===================================================================== */
+const ROUTES = ['dashboard','monitoring','hardware','config','api'];
+function route(){
+  const r = ROUTES.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'dashboard';
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.view === r));
+  document.querySelectorAll('#tabs a').forEach(a => a.classList.toggle('active', a.dataset.route === r));
+  if (!location.hash) history.replaceState(null, '', '#dashboard');
+  scheduleRender();
+}
+
+function syncControls(){ $('slTemp').value = state.cond.temperature; $('slHum').value = state.cond.humidity; }
+
+function bind(){
+  window.addEventListener('hashchange', route);
+  $('slTemp').addEventListener('input', e => { Sound.ensure(); App.setConditions({ temperature:Number(e.target.value) }); });
+  $('slHum').addEventListener('input', e => App.setConditions({ humidity:Number(e.target.value) }));
+  document.querySelectorAll('.scen').forEach(b => b.addEventListener('click', () => { Sound.ensure(); App.setConditions({ ...SCENARIOS[b.dataset.scen] }); syncControls(); }));
+  $('labReset').addEventListener('click', () => { App.setConditions({ ...SIM_DEFAULT }); syncControls(); });
+  $('powerBtn').addEventListener('click', () => { Sound.ensure(); App.setPower(!state.powered); });
+  $('langBtn').addEventListener('click', () => { state.settings.lang = lang() === 'ar' ? 'en' : 'ar'; saveSettings(); applyI18n(); });
+  $('partsBtn').addEventListener('click', () => { state.partsShown = !state.partsShown; scheduleRender(); });
+  $('zoomIn').addEventListener('click', () => Viewer.zoomIn());
+  $('zoomOut').addEventListener('click', () => Viewer.zoomOut());
+  $('viewReset').addEventListener('click', () => Viewer.resetView());
+  $('clearLog').addEventListener('click', () => { state.events = []; state.history = []; state.enteredAt = { yellow:null, red:null }; scheduleRender(); });
+  document.querySelectorAll('.node').forEach(n => n.addEventListener('click', () => { hwSelected = n.dataset.hw; renderHardware(); }));
+
+  // settings
+  const thChange = () => {
+    const y = parseFloat($('inYellow').value), r = parseFloat($('inRed').value);
+    const valid = Number.isFinite(y) && Number.isFinite(r) && y >= 0 && r <= 50 && r > y;
+    $('thErr').textContent = valid ? '' : t('thErr');
+    if (valid) App.updateSettings({ yellowAt:y, redAt:r });
+  };
+  $('inYellow').addEventListener('change', thChange); $('inRed').addEventListener('change', thChange);
+  $('swVib').addEventListener('change', e => App.updateSettings({ vibration:e.target.checked }));
+  $('swSound').addEventListener('change', e => { if (e.target.checked) Sound.ensure(); App.updateSettings({ sound:e.target.checked }); });
+  $('inName').addEventListener('change', e => App.updateSettings({ deviceName:e.target.value.trim() || DEFAULT_SETTINGS.deviceName }));
+  $('selLang').addEventListener('change', e => { App.updateSettings({ lang:e.target.value }, { silent:true }); applyI18n(); });
+  $('setResetSim').addEventListener('click', () => { App.resetSimulation(); toast(t('resetSim') + ' ✓'); });
+  $('setResetAll').addEventListener('click', () => { state.settings = { ...DEFAULT_SETTINGS, lang:lang() }; saveSettings(); $('thErr').textContent = ''; if (state.powered) adapter.setConditions({}); applyI18n(); toast(t('saved')); });
+  $('copyJson').addEventListener('click', async () => {
+    const txt = JSON.stringify(currentPayload(), null, 2);
+    try { await navigator.clipboard.writeText(txt); toast(t('copied')); } catch(e){ toast(t('copyFail')); }
+  });
+  window.addEventListener('resize', () => scheduleRender());
+}
+
+/* =====================================================================
+   12) BOOT
+   ===================================================================== */
+function boot(){
+  bind(); syncControls();
+  const stage = $('hatStage');
+  if (Hat3D.init(stage)) Viewer = Hat3D;
+  else { Hat2D.init(stage); Viewer = Hat2D; }
+  if (!window.lucide) { $('zoomIn').textContent = '+'; $('zoomOut').textContent = '−'; $('viewReset').textContent = '↺'; }
+  applyI18n(); route(); icons();
+  adapter.connect();
+  // expose for debugging / future integration
+  window.THILLI = { AlertEngine, HeatIndex, normalizeReading, SimulationAdapter, LiveDeviceAdapter, state, App };
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</body>
+</html>
